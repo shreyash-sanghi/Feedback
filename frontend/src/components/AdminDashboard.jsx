@@ -180,7 +180,7 @@ if (token) {
                             </tr>
                         </thead>
                         {initial_data.map((result,index)=>{
-                           const link = `http://localhost:5174/${result._id}`;
+                           const link = `https://payclickfeedback.vercel.app/${result._id}`;
                             return(<>
                               <tbody class="bg-white">
                                 <tr>
