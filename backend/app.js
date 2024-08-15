@@ -9,13 +9,13 @@ const Team = require("./src/model/Team")
 const FeedbackMessage = require("./src/model/FeedbackMessage")
 const auth = require("./src/mideal/auth")
 app.use(cors({
-    origin:"http://localhost:5174",
+    origin:"https://payclickfeedback.vercel.app",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
     credential:true
 }))
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', "http://localhost:5174",);
+    res.header('Access-Control-Allow-Origin', "https://payclickfeedback.vercel.app",);
     res.header('Access-Control-Allow-Credentials', "true");
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
