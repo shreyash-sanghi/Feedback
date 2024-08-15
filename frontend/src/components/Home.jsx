@@ -82,7 +82,7 @@ const {id} = useParams();
                     <div class="flex -mx-3">
                         <div class="w-full px-3 mb-5">
                             <label  class="text-xs font-semibold px-1">Rating for service 1 to 5 (required)</label>
-                            <div class="flex gap-10">
+                            <div class="flex flex-wrap gap-10">
 
  
   <div class="inline-flex items-center">
@@ -190,7 +190,7 @@ const {id} = useParams();
 </div>
 
 {/* <!-- BUY ME A BEER AND HELP SUPPORT OPEN-SOURCE RESOURCES --> */}
-<div class="flex items-end justify-end absolute top-2 md:top-10 left-2 md:left-10 mb-4 mr-4 z-10">
+<div class="flex items-end justify-end absolute top-4 md:top-10 left-2 md:left-10 mb-4 mr-4 z-10">
     <div>
         <a title="Buy me a beer" target="_blank" class="block h-7 sm:h-12 md:h-16  transition-all  hover:shadow-lg transform hover:scale-110 hover:rotate-12">
             <img class="object-cover object-center w-full h-full " src={payclick}/>
