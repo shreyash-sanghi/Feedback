@@ -11,7 +11,7 @@ export default function FeedbackDashboard() {
      axios.defaults.headers.common['Authorization'] = token;
      }
       try {
-          const result = await axios.get(`http://localhost:7000/get_feedback`);
+          const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_feedback`);
           final_data(result.data.response)
       } catch (error) {
         console.log(error.response.status);
@@ -103,7 +103,7 @@ console.log(initial_data)
                                     <td class="px-6 py-4 whitespace-no-wrap   leading-5">
                                       <button onClick={async()=>{
                                         try {
-                                          await axios.delete(`http://localhost:7000/delete_feedback/${result._id}`)
+                                          await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`)
                                           alert("success..")
                                           verifyUser();
                                         } catch (error) {

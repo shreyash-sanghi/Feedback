@@ -35,7 +35,7 @@ const {id} = useParams();
             return;
         }
         else{
-         await axios.post(`http://localhost:7000/send_feedback/${id}`,{
+         await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
             Name,Number,Rating, Suggestions
          })
         alert("Thankyou For You Feedback...")
