@@ -29,7 +29,9 @@ app.use(function (req, res, next) {
       console.log("Data base have been connected...")
   })
 
-  
+  app.get("/",(req,res)=>{
+    res.send("Hello My name is shreyash jain ");
+})
 app.post("/send_feedback/:id",async(req,res)=>{
     try {
         const id = req.params.id;
