@@ -16,7 +16,8 @@ const verifyotp = async(e)=>{
           sessionStorage.setItem('token', token);
         navigate(`/admin_dashboard`)
     } catch (error) {
-        alert("Please Enter valid Code...")
+        // alert("Please Enter valid Code...")
+        alert(error)
     }
 }
   return (
