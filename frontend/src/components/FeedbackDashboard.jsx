@@ -15,7 +15,7 @@ export default function FeedbackDashboard() {
       axios.defaults.headers.common['Authorization'] = token;
     }
     try {
-      const result = await axios.get(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/get_feedback`);
+      const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_feedback`);
       setFinalData(result.data.response);
       setFilteredData(result.data.response); // Initialize filtered data with all feedback
     } catch (error) {
@@ -202,7 +202,7 @@ export default function FeedbackDashboard() {
                     <button
                       onClick={async () => {
                         try {
-                          await axios.delete(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`);
+                          await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`);
                           alert("Feedback removed successfully");
                           verifyUser();
                         } catch (error) {

@@ -7,7 +7,7 @@ const [code,setCode] = useState("");
 const verifyotp = async(e)=>{
     e.preventDefault();
     try {
-        const response = await axios.post(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/verify_key`,{
+        const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/verify_key`,{
           key:code
         })
         const token = response.data.Token;

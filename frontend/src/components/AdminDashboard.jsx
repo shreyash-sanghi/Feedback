@@ -35,7 +35,7 @@ export default function AdminDashboard() {
          return;
      }
      else{
-      await axios.post(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/add_team`,{
+      await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/add_team`,{
         Name,Number,Email
       })
       verifyUser()
@@ -53,7 +53,7 @@ if (token) {
   axios.defaults.headers.common['Authorization'] = token;
 }
         try {
-            const result = await axios.get(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/get_team`);
+            const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_team`);
             final_data(result.data.response)
         } catch (error) {
           console.log(error.response.status);
@@ -215,7 +215,7 @@ if (token) {
                                         try {
                                           const con = confirm("Have you confirm to delete...");
                                           if(con){
-                                            await axios.delete(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/delete_team_member/${result._id}`)
+                                            await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_team_member/${result._id}`)
                                             alert("success..")
                                             verifyUser();
                                           }

@@ -43,7 +43,7 @@ const {id} = useParams();
           let month = date.getMonth() + 1;
           let year = date.getFullYear();
               let currentDate = `${day}-${month}-${year}`;
-         await axios.post(`https://feedbackbackend-git-main-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+         await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
             Name,Number,Rating, Suggestions,FeedbackDate:currentDate
          })
         alert("Thankyou For You Feedback...")
