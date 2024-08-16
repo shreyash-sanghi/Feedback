@@ -5,6 +5,7 @@ const Events = new mongoose.Schema({
     Number:{type:Number,required:true},
     Rating:{type:String,required:true},
     Suggestions:{type:String},
+    FeedbackDate:{type:String,required:true},
     MemberName:{type:String,required:true},
 })
 const Event = mongoose.model("FeedbackMessage",Events);  

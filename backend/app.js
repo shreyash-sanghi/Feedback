@@ -35,10 +35,10 @@ app.use(function (req, res, next) {
 app.post("/send_feedback/:id",async(req,res)=>{
     try {
         const id = req.params.id;
-        const {Name,Number,Rating,Suggestions} = req.body;
+        const {Name,Number,Rating,Suggestions,FeedbackDate} = req.body;
         const result = await Team.findById(id);
         const response = await FeedbackMessage.create({
-            Name,Number,Rating,Suggestions,MemberName:result.Name
+            Name,Number,Rating,Suggestions,MemberName:result.Name,FeedbackDate
         })
         res.sendStatus(202);
     } catch (error) {
