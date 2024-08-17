@@ -1,29 +1,52 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import payclick from "../assets/payclick.webp"
 import payclickmobile from "../assets/mobilepay.png"
 import { useParams } from 'react-router-dom';
+import {
+	Button,
+	Dialog,
+	DialogHeader,
+	DialogBody,
+	DialogFooter,
+  } from "@material-tailwind/react";
 export default function Home() {
 const {id} = useParams();
+const token = localStorage.getItem("OneTimeToken");
+const [tokdata,set_tok_data] = useState({})
     const [initial,final] = useState({
         Name:"",
         Number:"",
         Rating:"",
         Suggestions:"",
+        TeamHelped:"",
 
     })
+    const [iniOTP,setOTP] = useState();
+    const [gernateOtp,realOtp] = useState();
     const setdata = (e)=>{
         const {name,value} = e.target;
         final((info)=>{
+          if (name === "Number") {
+            if(token != null){
+              localStorage.removeItem("OneTimeToken");
+            }
+          }
             return{
                 ...info,
                 [name] :value
             }
         })
     }
+
     const savedata = async()=>{
        try {
-        const {Name,Number,Rating, Suggestions} = initial;
+        const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
+        console.log(token);
+        if(token === null || token === undefined){
+           sendOtp();
+        }
+        else{ 
         if(Name === ""){
             alert("Please Enter Your Name... ")
             return;
@@ -36,6 +59,10 @@ const {id} = useParams();
             alert("Please Provide Rating... ")
             return;
         }
+        else if(TeamHelped === ""){
+            alert("Please fill In what way has my team helped you? ")
+            return;
+        }
         else{
           const date = new Date();
 
@@ -44,19 +71,118 @@ const {id} = useParams();
           let year = date.getFullYear();
               let currentDate = `${day}-${month}-${year}`;
          await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
-            Name,Number,Rating, Suggestions,FeedbackDate:currentDate
+            Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
          })
         alert("Thankyou For You Feedback...")
         window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
     }
+        }
+        
+
        } catch (error) {
-        alert("They have some error...")
+        console.log(error)
+           alert(error)
+        // alert("They have some error...")
        }
     }
+	      //Pop UP
+        const [size, setSize] = React.useState(null);
+        const handleOpen = (value) => setSize(value);
+
+             //gernate otp
+	 const gernate_otp = ()=>{
+    const length =6;
+    let otp=""
+    for(let i=0;i<length;i++ ){
+      otp += Math.floor(Math.random()*10);
+    }
+    return otp;
+}
+
+const sendOtp = async()=>{
+  const Number = initial.Number;
+  const otp = gernate_otp();
+  const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_otp`,{
+    OTP:otp,Number
+  })
+  realOtp(otp);
+   setTimeout(()=>{
+     handleOpen("xxl");
+   },2000)
+}
+
+const matchOtp = async()=>{
+  if(gernateOtp == iniOTP){
+          try {
+            const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
+            const gettoken = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_token`,{
+              Number,Name
+            });
+            const OneTimeToken = localStorage.setItem("OneTimeToken",gettoken.data.token);
+            if(Name === ""){
+              alert("Please Enter Your Name... ")
+              return;
+          }
+          else if(Number === ""){
+              alert("Please Enter Valid Number... ")
+              return;
+          }
+          else if(Rating === ""){
+              alert("Please Provide Rating... ")
+              return;
+          }
+          else if(TeamHelped === ""){
+              alert("Please fill In what way has my team helped you? ")
+              return;
+          }
+          else{
+            const date = new Date();
+  
+            let day = date.getDate();
+            let month = date.getMonth() + 1;
+            let year = date.getFullYear();
+                let currentDate = `${day}-${month}-${year}`;
+           await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+              Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
+           })
+          alert("Thankyou For You Feedback...")
+          window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
+      }
+    } catch (error) {
+      alert("One Time authentication have been failed...")
+    }
+  }
+  else{
+    alert("please Enter correct OTP...");
+  }
+ }
+
+const verifyToken = async()=>{
+  try{
+    if(token != null){
+      axios.defaults.headers.common["Authorization"] = token;
+      const check  = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/Check_token`);
+      final((prevState) => ({
+        ...prevState,
+        Name: check.data.response.Name,    
+        Number: check.data.response.Number,
+      }));
+    }}catch(error){
+      if(error.request.status === 401){
+        localStorage.removeItem("OneTimeToken")
+      }else{
+        alert(error);
+      }
+    }
+}
+
+ useEffect(()=>{
+  verifyToken()
+ },[])
 
   return (
 <>
-<div class="min-w-screen max-h-screen flex items-center justify-center px-5 py-5">
+<div class="min-w-screen sm:max-h-screen flex items-center justify-center px-5 py-5">
     <div class="bg-gray-100 text-gray-500 rounded-3xl shadow-xl w-full overflow-hidden" >
         <div class="lg:flex w-full">
             <div class="hidden  w-[40%] py-2 lg:flex items-center bg-white px-2 opacity-85">
@@ -74,7 +200,7 @@ const {id} = useParams();
                             <label class="text-xs font-semibold px-1">Name</label>
                             <div class="flex">
                                 <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
-                                <input onChange={setdata} name='Name' type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="John"/>
+                                <input value={initial.Name} onChange={setdata} name='Name' type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="John"/>
                             </div>
                         </div>
            
@@ -82,17 +208,17 @@ const {id} = useParams();
                     <div class="flex -mx-3">
                       
                         <div class="w-full px-3 mb-5">
-                            <label  class="text-xs font-semibold px-1">Number</label>
+                            <label  class="text-xs font-semibold px-1">WhatsApp Number</label>
                             <div class="flex">
                                 <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
-                                <input onChange={setdata} name='Number'   type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="12345678"/>
+                                <input value={initial.Number} onChange={setdata} name='Number'   type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="12345678"/>
                             </div>
                         </div>
                     </div>
                     <div class="flex -mx-3">
                         <div class="w-full px-3 mb-5">
                             <label  class="text-xs font-semibold px-1">Rating for service 0 to 10 (required)</label>
-                            <div class="flex flex-wrap gap-10">
+                            <div class="flex flex-wrap gap-3">
 
  
   <div class="inline-flex items-center">
@@ -279,10 +405,19 @@ const {id} = useParams();
           
                     <div class="flex -mx-3">
                         <div class="w-full px-3 mb-10">
+                            <label  class="text-xs font-semibold  px-1"> In what way has my team helped you?</label>
+                            <div class="flex">
+                                <div class="w-10 z-10 pl-1  text-center pointer-events-none flex items-center justify-center"></div>
+                                <textarea type="text" name='TeamHelped' onChange={setdata} class="w-full -ml-10 pl-2 min-h-16 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="If they have any Suggestions regarding service please enter."/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex -mx-3">
+                        <div class="w-full px-3 mb-10">
                             <label  class="text-xs font-semibold  px-1"> Suggestions (optional)</label>
                             <div class="flex">
                                 <div class="w-10 z-10 pl-1  text-center pointer-events-none flex items-center justify-center"></div>
-                                <textarea type="text" name='Suggestions' onChange={setdata} class="w-full -ml-10 pl-2 min-h-28 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="If they have any Suggestions regarding service please enter."/>
+                                <textarea type="text" name='Suggestions' onChange={setdata} class="w-full -ml-10 pl-2 min-h-20 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="If they have any Suggestions regarding service please enter."/>
                             </div>
                         </div>
                     </div>
@@ -305,6 +440,79 @@ const {id} = useParams();
         </a>
     </div>
 </div>
+
+<Dialog
+        open={
+          size === "xxl"
+        }
+        size={size || "md"}
+        handler={handleOpen}
+        className="bg-gray-200  justify-center h-screen w-full  opacity-60 "
+      >
+        <button onClick={() => handleOpen(null)} className="flex absolute text-black top-3 right-10 text-5xl">X</button>
+        <div className="md:w-1/2 xl:w-[30%] mt-5 flex flex-col  bg-white rounded-2xl  justify-center mx-auto">
+        <DialogBody>
+        <div class="flex justify-center items-center py-5 rounded-lg dark:bg-gray-200">
+    <div class="grid gap-8">
+      <div
+        id="back-div"
+        class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-[26px] mx-4"
+      >
+        <div
+          class="border-[20px] border-transparent rounded-[20px] dark:bg-gray-900  shadow-lg xl:px-10 2xl:px-10 lg:px-10 md:px-10 sm:px-2 m-2"
+        >
+          <h1 class="pt-2  font-bold dark:text-gray-400 text-xl text-center cursor-default">
+            One Time  Verification
+          </h1>
+          <h1 className='text-xs my-2 w-full text-white'>OTP have been send in your WhatsApp Number</h1>
+          <div method="POST" class="space-y-4">
+            <div>
+              <label for="email" class="mb-2  dark:text-gray-400 text-lg">OTP</label>
+              <input
+                class="border p-3 dark:bg-indigo-700 dark:text-gray-300  dark:border-gray-700 shadow-md placeholder:text-base focus:scale-105 ease-in-out duration-300 border-gray-300 rounded-lg w-full"
+                type="text"
+                onChange={(e)=>setOTP(e.target.value)}
+                name="Email"
+                required
+              />
+            </div>
+            <button
+              class="bg-gradient-to-r  dark:text-gray-300 from-blue-500 to-purple-500 shadow-lg mt-10 p-2 text-white rounded-lg w-full hover:scale-105 hover:from-purple-500 hover:to-blue-500 transition duration-300 ease-in-out"
+              type="submit"
+              onClick={()=>{
+                matchOtp()
+              }}
+            >
+              Verify
+            </button>
+          </div>
+          <div
+            class="text-gray-500 flex text-center flex-col mt-2 items-center text-sm"
+          >
+            <p class="cursor-default">
+              {/* By signing in, you agree to our */}
+      
+              and
+              <a
+                class="group text-blue-400 transition-all duration-100 ease-in-out"
+                href="#"
+              >
+                <button
+                onClick={()=>sendOtp()}
+                  class="cursor-pointer mx-2 bg-left-bottom bg-gradient-to-r from-blue-400 to-blue-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-500 ease-out"
+                >
+                  resend otp
+                </button>
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+        </DialogBody>
+        </div>
+      </Dialog> 
 </>
   )
 }

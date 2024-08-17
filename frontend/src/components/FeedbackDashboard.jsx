@@ -7,6 +7,7 @@ export default function FeedbackDashboard() {
   const navigate = useNavigate();
   const [initial_data, setFinalData] = useState([]);
   const [filterDate, setFilterDate] = useState(""); // To store selected specific date
+  const [filterMemberName, setFilterMemberName] = useState(""); // To store selected member name
   const [filteredData, setFilteredData] = useState([]);
 
   const verifyUser = async () => {
@@ -39,6 +40,25 @@ export default function FeedbackDashboard() {
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   };
 
+  // Function to handle filtering based on both date and member name
+  const handleFilters = () => {
+    let filtered = initial_data;
+
+    if (filterDate) {
+      const formattedFilterDate = dayjs(filterDate).format('YYYY-MM-DD');
+      filtered = filtered.filter((result) => {
+        const feedbackDateFormatted = dayjs(convertDateFormat(result.FeedbackDate)).format('YYYY-MM-DD');
+        return feedbackDateFormatted === formattedFilterDate;
+      });
+    }
+
+    if (filterMemberName) {
+      filtered = filtered.filter((result) => result.MemberName.toLowerCase().includes(filterMemberName.toLowerCase()));
+    }
+
+    setFilteredData(filtered);
+  };
+
   // Function to handle filter based on date range
   const handleDateRangeFilter = (months) => {
     if (filterDate) {
@@ -51,26 +71,14 @@ export default function FeedbackDashboard() {
       const feedbackDateFormatted = dayjs(convertDateFormat(result.FeedbackDate));
       return feedbackDateFormatted.isAfter(targetDate); // Keep data within the range
     });
-    setFilteredData(filtered);
-  };
 
-  // Function to handle specific date filtering
-  const handleDateFilter = () => {
-    if (!filterDate) {
-      setFilteredData(initial_data); // Show all data if no specific date selected
-      return;
-    }
-
-    const filtered = initial_data.filter((result) => {
-      const feedbackDateFormatted = dayjs(convertDateFormat(result.FeedbackDate)).format('YYYY-MM-DD');
-      return feedbackDateFormatted === filterDate; // Show data matching specific date
-    });
     setFilteredData(filtered);
   };
 
   // Function to reset filters and show all data
   const handleShowAll = () => {
     setFilterDate(""); // Reset date filter
+    setFilterMemberName(""); // Reset member name filter
     setFilteredData(initial_data); // Show all data
   };
 
@@ -80,32 +88,35 @@ export default function FeedbackDashboard() {
 
   // Use effect to apply filters based on changes
   useEffect(() => {
-    if (filterDate) {
-      handleDateFilter(); // Apply specific date filter
-    } else {
-      handleDateRangeFilter(1); // Default to last month if no specific date is selected
-    }
-  }, [initial_data, filterDate]);
+    handleFilters(); // Apply filters whenever data or filter criteria change
+  }, [initial_data, filterDate, filterMemberName]);
 
   return (
     <div>
       <div className='flex sm:flex-row flex-col items-center justify-between bg-black text-white'>
-        <div className="flex ml-10 mr-8">
+        <div className="flex flex-wrap items-center w-full sm:w-fit justify-between  ml-10 mr-8">
           <Link to={`/admin_dashboard`} className="no-underline text-xl font-semibold md:text-blue-dark flex items-center py-4 sm:pr-20">
-            <svg className="h-6 w-6 fill-current mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <svg className="h-6 w-6 fill-current sm:mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M3.889 3h6.222a.9.9 0 0 1 .889.91v8.18a.9.9 0 0 1-.889.91H3.89A.9.9 0 0 1 3 12.09V3.91A.9.9 0 0 1 3.889 3zM3.889 15h6.222c.491 0 .889.384.889.857v4.286c0 .473-.398.857-.889.857H3.89C3.398 21 3 20.616 3 20.143v-4.286c0-.473.398-.857.889-.857zM13.889 11h6.222a.9.9 0 0 1 .889.91v8.18a.9.9 0 0 1-.889.91H13.89a.9.9 0 0 1-.889-.91v-8.18a.9.9 0 0 1 .889-.91zM13.889 3h6.222c.491 0 .889.384.889.857v4.286c0 .473-.398.857-.889.857H13.89C13.398 9 13 8.616 13 8.143V3.857c0-.473.398-.857.889-.857z" />
             </svg>
             Dashboard
           </Link>
+          <input
+              type="text"
+              placeholder="Filter by Member Name"
+              onChange={(e) => setFilterMemberName(e.target.value)}
+              value={filterMemberName}
+              className="text-white border-2 h-fit rounded-md px-2  sm:hidden block mr-2 bg-black appearance-none focus:outline-none "
+              // style={{ padding: "5px", borderRadius: "5px", color: "white", border: "1px solid white", width: "200px" }}
+            />
         </div>
 
-        <ul className='flex'>
+        <ul className='flex items-center'>
           <div className='' style={{ position: "relative", display: "inline-block" }}>
             <input
               type="date"
               onChange={(e) => {
                 setFilterDate(e.target.value);
-                // Apply specific date filter immediately
               }}
               value={filterDate}
               className="text-white sm:block hidden bg-black appearance-none focus:outline-none pr-10"
@@ -121,6 +132,17 @@ export default function FeedbackDashboard() {
             >
               <path d="M6 2a1 1 0 000 2h8a1 1 0 100-2H6zM4 5a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2H4zm0 2h12v10H4V7z" />
             </svg>
+          </div>
+
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <input
+              type="text"
+              placeholder="Filter by Member Name"
+              onChange={(e) => setFilterMemberName(e.target.value)}
+              value={filterMemberName}
+              className="text-white sm:block hidden ml-2 bg-black appearance-none focus:outline-none pr-10"
+              style={{ padding: "10px", borderRadius: "5px", color: "white", border: "1px solid white", width: "200px" }}
+            />
           </div>
 
           {navItems.map(item => (
@@ -165,7 +187,6 @@ export default function FeedbackDashboard() {
               type="date"
               onChange={(e) => {
                 setFilterDate(e.target.value);
-                // Apply specific date filter immediately
               }}
               value={filterDate}
               className="text-white mt-2 sm:hidden block bg-blue-500 appearance-none focus:outline-none pr-10"
