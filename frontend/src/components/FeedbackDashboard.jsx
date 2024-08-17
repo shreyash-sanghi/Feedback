@@ -9,6 +9,9 @@ export default function FeedbackDashboard() {
   const [filterDate, setFilterDate] = useState(""); // To store selected specific date
   const [filterMemberName, setFilterMemberName] = useState(""); // To store selected member name
   const [filteredData, setFilteredData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Current page number
+  const itemsPerPage = 20; // Limit of 20 items per page
+
 
   const verifyUser = async () => {
     const token = sessionStorage.getItem('token');
@@ -91,6 +94,18 @@ export default function FeedbackDashboard() {
     handleFilters(); // Apply filters whenever data or filter criteria change
   }, [initial_data, filterDate, filterMemberName]);
 
+
+    // Calculate pagination data
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredData.slice(startIndex, startIndex + itemsPerPage);
+  
+    // Function to handle page change
+    const goToPage = (pageNumber) => {
+      if (pageNumber >= 1 && pageNumber <= totalPages) {
+        setCurrentPage(pageNumber);
+      }
+    };
   return (
     <div>
       <div className='flex sm:flex-row flex-col items-center justify-between bg-black text-white'>
@@ -210,7 +225,7 @@ export default function FeedbackDashboard() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {filteredData.map((result, index) => (
+              {currentItems.map((result, index) => (
                 <tr key={result.ID}>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{index + 1}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.Name}</td>
@@ -241,6 +256,33 @@ export default function FeedbackDashboard() {
           </table>
         </div>
       </div>
-    </div>
+   
+        
+          <div className="flex justify-center items-center mt-4">
+          <button
+            className="px-3 py-1 border border-gray-300 rounded-md text-gray-600"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              className={`px-3 py-1 border border-gray-300 rounded-md mx-1 ${currentPage === page ? 'bg-gray-300' : ''}`}
+              onClick={() => goToPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            className="px-3 py-1 border border-gray-300 rounded-md text-gray-600"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+        </div> 
   );
 }
