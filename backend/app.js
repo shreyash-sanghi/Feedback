@@ -42,7 +42,7 @@ function parseDateString(dateString) {
 
 app.post("/send_feedback/:id", async (req, res) => {
    
-    const { Name, Number, Rating, Suggestions, FeedbackDate, TeamHelped } = req.body;
+    const { Name,FeedbackTime, Number, Rating, Suggestions, FeedbackDate, TeamHelped } = req.body;
 
     const apiUrl = 'https://whatsbot.tech/api/send_sms';
     const apiToken = process.env.otp_api_token;
@@ -89,7 +89,8 @@ Powered By :- Pay Click Online Services
                 MemberName: result.Name,
                 FeedbackDate: FeedbackDate, // Save as a Date object
                 MonthDate:feedbackDateObject,
-                TeamHelped
+                TeamHelped,
+                FeedbackTime
             });
         // If no feedback found for this month, proceed with sending the SMS and saving the feedback
         await axios.get(apiUrl, {
@@ -225,9 +226,16 @@ app.post("/edit_team_member/:id",auth,async(req,res)=>{
     try {
         const id = req.params.id;
         const {Name,Number,Email,Profile}= req.body;
-        const response = await Team.findOneAndUpdate({_id:id},{
-            Name,Number,Email,Profile
-        })
+        console.log(Profile)
+        if(Profile === undefined  ){
+            const response = await Team.findOneAndUpdate({_id:id},{
+                Name,Number,Email
+            })
+        }else{
+            const response = await Team.findOneAndUpdate({_id:id},{
+                Name,Number,Email,Profile
+            })
+        }
         console.log("success")
         res.sendStatus(202)
     } catch (error) {

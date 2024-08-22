@@ -11,7 +11,7 @@ export default function FeedbackDashboard() {
   const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Current page number
   const itemsPerPage = 20; // Limit of 20 items per page
-
+  const [feedbackCounts, setFeedbackCounts] = useState({});
 
   const verifyUser = async () => {
     const token = sessionStorage.getItem('token');
@@ -20,8 +20,18 @@ export default function FeedbackDashboard() {
     }
     try {
       const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_feedback`);
-      setFinalData(result.data.response);
-      setFilteredData(result.data.response); // Initialize filtered data with all feedback
+      
+      // Sort the data based on FeedbackDate and FeedbackTime
+      const sortedData = result.data.response.sort((a, b) => {
+        const aDateTime = dayjs(`${convertDateFormat(a.FeedbackDate)} ${a.FeedbackTime}`);
+        const bDateTime = dayjs(`${convertDateFormat(b.FeedbackDate)} ${b.FeedbackTime}`);
+        return bDateTime - aDateTime; // Descending order
+      });
+
+      setFinalData(sortedData);
+      setFilteredData(sortedData);
+         // Calculate the feedback counts for each member
+         calculateFeedbackCounts(sortedData);
     } catch (error) {
       console.log(error.response.status);
       if (error.response.status === 401) {
@@ -30,6 +40,18 @@ export default function FeedbackDashboard() {
         alert(error);
       }
     }
+  };
+
+  const calculateFeedbackCounts = (data) => {
+    const currentMonth = dayjs().month(); // Get the current month
+    const counts = data.reduce((acc, feedback) => {
+      const feedbackMonth = dayjs(feedback.FeedbackDate, 'DD-MM-YYYY').month();
+      if (feedbackMonth === currentMonth) {
+        acc[feedback.MemberName] = (acc[feedback.MemberName] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    setFeedbackCounts(counts);
   };
 
   const navItems = [
@@ -108,6 +130,7 @@ export default function FeedbackDashboard() {
     };
   return (
     <div>
+   
       <div className='flex sm:flex-row flex-col items-center justify-between bg-black text-white'>
         <div className="flex flex-wrap items-center w-full sm:w-fit justify-between  ml-10 mr-8">
           <Link to={`/admin_dashboard`} className="no-underline text-xl font-semibold md:text-blue-dark flex items-center py-4 sm:pr-20">
@@ -198,6 +221,7 @@ export default function FeedbackDashboard() {
         <button className='text-white mt-2 bg-blue-500 px-4 py-2 rounded' onClick={() => handleDateRangeFilter(12)}>
           Last 1 Year
         </button>
+        
         <input
               type="date"
               onChange={(e) => {
@@ -208,7 +232,16 @@ export default function FeedbackDashboard() {
               style={{ padding: "10px", borderRadius: "5px", color: "white", border: "1px solid white", width: "200px" }}
             />
       </div>
-
+      <div className="text-center p-4">
+        {/* <h2 className="text-2xl font-semibold">Feedback Counts by Team Member for this Month</h2> */}
+        <ul>
+          {Object.entries(feedbackCounts).map(([memberName, count]) => (
+            <li className='text-black' key={memberName}>
+              {memberName}: {count} feedback(s)
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 pr-10 lg:px-8">
         <div className="align-middle inline-block min-w-full shadow overflow-hidden bg-white shadow-dashboard px-8 pt-3 rounded-bl-lg rounded-br-lg">
           <table className="min-w-full">

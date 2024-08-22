@@ -1,13 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import { useNavigate ,Link} from 'react-router-dom';
+import { imageDb } from "./Config.js";
+import { ref, uploadBytes,deleteObject ,getDownloadURL,getStorage} from "firebase/storage";   
+import User_profile from "../assets/user_profile.jpg"
+import {v4} from 'uuid';
 export default function AdminDashboard() {
-  const [initial_data,final_data] = useState([]);
+  const [initial_data, final_data] = useState([]);
+  const [downloadUrls, setDownloadUrls] = useState({});
+  const [EditData,setEditData] = useState({
+    tid:"",
+    Name:"",
+    Number:"",
+    Email:""
+  })
+  const [EditBool,setEditBool] = useState(false);
   const [initial,final]= useState({
     Name:"",
     Number:"",
     Email:""
   })
+  const [EditProfile,SetEditProfile] = useState();
+  const [PastProfile,SetPastProfile] = useState();
+  const [PastProfileName,SetPastProfileName] = useState();
+  const [profile,setProfile] = useState();
   const navigate = useNavigate();
   const [copiedIndex, setCopiedIndex] = useState(null);
   const setdata = (e)=>{
@@ -19,10 +35,23 @@ export default function AdminDashboard() {
       }
     })
   }
+  const setEdit = (e)=>{
+    const {name,value} = e.target;
+    setEditData((info)=>{
+      return{
+        ...info,
+        [name]:value
+      }
+    })
+  }
+
   const savedata = async()=>{
     try {
      const {Name,Number,Email} = initial;
-     if(Name === ""){
+    if (profile === undefined){
+      alert("Please Uplode Profile...")
+    }
+    else if(Name === ""){
          alert("Please Enter Your Name... ")
          return;
      }
@@ -35,36 +64,133 @@ export default function AdminDashboard() {
          return;
      }
      else{
+      const storage = getStorage();
+      const image = `${profile.name + v4()}`;
+     const imgref = ref(storage,`files/${image}`);
+  
       await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/add_team`,{
-        Name,Number,Email
+        Name,Number,Email,Profile:image
       })
+      try {
+        uploadBytes(imgref,profile)
+        
+      } catch (error) {
+        toast("Your Profile have not uplode")
+        setLoading(false)
+          return;
+      }
       verifyUser()
      alert("Success...")
  }
     } catch (error) {
-     alert("They have some error...")
+     alert(error)
+    //  alert("They have some error...")
+    }
+ }
+  const saveupdatedata = async()=>{
+    try {
+     const {Name,Number,Email,tid} = EditData;
+    if (PastProfile === undefined && EditProfile === undefined){
+      alert("Please Uplode Profile...")
+    }
+    else if(Name === ""){
+         alert("Please Enter Your Name... ")
+         return;
+     }
+     else if(Number === ""){
+         alert("Please Enter Valid Number... ")
+         return;
+     }
+     else if(Email === ""){
+         alert("Please Provide Email... ")
+         return;
+     }
+     else{
+      if(PastProfile === undefined){
+        const storage = getStorage();
+        const image = `${EditProfile.name + v4()}`;
+       const imgref = ref(storage,`files/${image}`);
+       await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+        Name,Number,Email,Profile:image
+      })
+      try {
+        uploadBytes(imgref,EditProfile)
+      } catch (error) {
+        setLoading(false)
+          return;
+      }
+      }
+      else if(PastProfile != undefined && EditProfile === undefined ){
+        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+          Name,Number,Email
+        })
+      }
+      else if(PastProfile != undefined && EditProfile != undefined){
+        const storage = getStorage();
+        const desertRef = ref(storage,`files/${PastProfileName}`);
+        await deleteObject(desertRef)
+        const image = `${EditProfile.name + v4()}`;
+        const imgref = ref(storage,`files/${image}`);
+        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+         Name,Number,Email,Profile:image
+       })
+       try {
+         uploadBytes(imgref,EditProfile)
+       } catch (error) {
+         setLoading(false)
+           return;
+       }
+      }
+  
+
+      verifyUser()
+     alert("Success...")
+ }
+    } catch (error) {
+     alert(error)
+    //  alert("They have some error...")
     }
  }
 
 
-    const verifyUser = async()=>{
-      const token = sessionStorage.getItem('token');
-if (token) {
-  axios.defaults.headers.common['Authorization'] = token;
-}
-        try {
-            const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_team`);
-            final_data(result.data.response)
-        } catch (error) {
-          console.log(error.response.status);
-          if(error.response.status===401){
-            navigate(`/dashboard`)
-          }else{
-            alert(error);
+      const verifyUser = async()=>{
+        const token = sessionStorage.getItem('token');
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = token;
+  }
+          try {
+              const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_team`);
+              final_data(result.data.response)
 
+              // Fetch download URLs for profiles
+      const storage = getStorage();
+      const urls = {};
+
+      await Promise.all(
+        result.data.response.map(async (data) => {
+          if (data.Profile) {
+            try {
+              const url = await getDownloadURL(ref(storage, `files/${data.Profile}`));
+              urls[data._id] = url;
+            } catch (error) {
+              console.error(`Error fetching URL for ${data.Profile}:`, error);
+            }
           }
-        }
-    }
+        })
+      );
+
+      setDownloadUrls(urls);
+
+          } catch (error) {
+            console.log(error.response.status);
+            if(error.response.status===401){
+              navigate(`/dashboard`)
+            }else{
+              alert(error);
+
+            }
+          }
+      }
 
         // Array containing navigation items
         const navItems = [
@@ -73,9 +199,9 @@ if (token) {
 
         ];
 
-    useEffect(()=>{
-      verifyUser();
-    },[])
+      useEffect(()=>{
+        verifyUser();
+      },[])
 
     const copyToClipboard = (link, index) => {
       navigator.clipboard.writeText(link);
@@ -127,7 +253,173 @@ if (token) {
                     {/* <p>Enter your information to register</p> */}
                 </div>
                 <div>
-                    <div class="flex -mx-3">
+                  
+
+{(EditBool)?(<>
+  {(EditProfile === undefined) ? (<>
+  {(PastProfile === undefined)?(<>
+    <div
+                            class={`mx-auto flex justify-center w-[100px] h-[100px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat`}
+                            style={{ backgroundImage: `url(${User_profile})` }}                       
+                            >
+                          <a href="#">       
+              </a>
+                            <div class="bg-white/90 rounded-full w-4 h-4 text-center ml-20 mt-4">
+
+                                <input onChange={(e)=>SetEditProfile(e.target.files[0])} type="file" name="profile" id="upload_profile" hidden />
+
+                                <label for="upload_profile">
+                                        <svg data-slot="icon" class="w-6 h-5 text-blue-700" fill="none"
+                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
+                                            </path>
+                                        </svg>
+                                    </label>
+                            </div>
+                        </div>   
+  </>):(<>
+    <div
+                     class={`mx-auto flex justify-center w-[100px] h-[100px]  rounded-full bg-cover bg-center bg-no-repeat`}      
+                            // style={{ backgroundImage: PastProfile }}                       
+                            >
+                              <img  class={`mx-auto ml-4 flex justify-center w-[100px] h-[100px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat`}  src={PastProfile}/>
+                          <a href="#">
+        
+              </a>
+                            <div class="bg-white/90 rounded-full w-6 h-6 text-center  mt-4">
+
+                                <input onChange={(e)=>SetEditProfile(e.target.files[0])} type="file" name="profile" id="upload_profile" hidden />
+
+                                <label for="upload_profile">
+                                        <svg data-slot="icon" class="w-6 h-5 text-blue-700" fill="none"
+                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
+                                            </path>
+                                        </svg>
+                                    </label>
+                            </div>
+                        </div>      
+  </>)}
+                                     </>) : (<>
+                            <div
+                            class={`mx-auto flex justify-center w-[100px] h-[100px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat`}
+                            style={{ backgroundImage: `url(${URL.createObjectURL(EditProfile)})` }}                       
+                            >
+                          <a href="#">
+        
+              </a>
+                            <div class="bg-white/90 rounded-full w-6 h-6 text-center ml-28 mt-4">
+
+                                <input onChange={(e)=>SetEditProfile(e.target.files[0])} type="file" name="profile" id="upload_profile" hidden />
+
+                                <label for="upload_profile">
+                                        <svg data-slot="icon" class="w-6 h-5 text-blue-700" fill="none"
+                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
+                                            </path>
+                                        </svg>
+                                    </label>
+                            </div>
+                        </div>                </>)}
+        <h1 className='flex justify-center my-2 text-black'>My Profile</h1>
+  <div class="flex -mx-3">
+                        <div class="w-1/2 px-3 mb-5">
+                            <label class="text-xs font-semibold px-1">Name</label>
+                            <div class="flex">
+                                <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
+                                <input  value={EditData.Name} onChange={setEdit} name='Name' type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="John"/>
+                            </div>
+                        </div>
+                        <div class="w-1/2 px-3 mb-5">
+                            <label  class="text-xs font-semibold px-1">Number</label>
+                            <div class="flex">
+                                <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
+                                <input value={EditData.Number}  onChange={setEdit} name='Number'   type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="12345678"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center  -mx-3">
+              
+              <div class="w-1/2 px-3 mb-10">
+                  <label  class="text-xs font-semibold  px-1"> Email</label>
+                  <div class="flex">
+                      <div class="w-10 z-10 pl-1  text-center pointer-events-none flex items-center justify-center"></div>
+                      <input type="email" value={EditData.Email} name='Email' onChange={setEdit}  class="w-full -ml-10 pl-2  pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="abc@gmail.com"/>
+                  </div>
+                  
+              </div>
+                  <div class="w-1/3 px-3 mb-5">
+                  <button onClick={saveupdatedata} class="block w-full max-w-xs mx-auto bg-green-500 hover:bg-green-700 focus:bg-green-700 text-white rounded-lg px-3 py-3 font-semibold">Save Update Profile </button>
+              </div>  
+          </div>
+</>):(<>
+  {(profile === undefined) ? (<>
+                            <div
+                            class={`mx-auto flex justify-center w-[100px] h-[100px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat`}
+                            style={{ backgroundImage: `url(${User_profile})` }}                       
+                            >
+                          <a href="#">       
+              </a>
+                            <div class="bg-white/90 rounded-full w-4 h-4 text-center ml-20 mt-4">
+
+                                <input onChange={(e)=>setProfile(e.target.files[0])} type="file" name="profile" id="upload_profile" hidden />
+
+                                <label for="upload_profile">
+                                        <svg data-slot="icon" class="w-6 h-5 text-blue-700" fill="none"
+                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
+                                            </path>
+                                        </svg>
+                                    </label>
+                            </div>
+                        </div>                </>) : (<>
+                            <div
+                            class={`mx-auto flex justify-center w-[100px] h-[100px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat`}
+                            style={{ backgroundImage: `url(${URL.createObjectURL(profile)})` }}                       
+                            >
+                          <a href="#">
+        
+              </a>
+                            <div class="bg-white/90 rounded-full w-6 h-6 text-center ml-28 mt-4">
+
+                                <input onChange={(e)=>setProfile(e.target.files[0])} type="file" name="profile" id="upload_profile" hidden />
+
+                                <label for="upload_profile">
+                                        <svg data-slot="icon" class="w-6 h-5 text-blue-700" fill="none"
+                                            stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
+                                            </path>
+                                        </svg>
+                                    </label>
+                            </div>
+                        </div>                </>)}
+                            <h1 className='flex justify-center my-2 text-black'>My Profile</h1>
+  <div class="flex -mx-3">
                         <div class="w-1/2 px-3 mb-5">
                             <label class="text-xs font-semibold px-1">Name</label>
                             <div class="flex">
@@ -143,26 +435,25 @@ if (token) {
                             </div>
                         </div>
                     </div>
-
                     <div class="flex items-center  -mx-3">
               
-                        <div class="w-1/2 px-3 mb-10">
-                            <label  class="text-xs font-semibold  px-1"> Email</label>
-                            <div class="flex">
-                                <div class="w-10 z-10 pl-1  text-center pointer-events-none flex items-center justify-center"></div>
-                                <input type="email" name='Email' onChange={setdata}  class="w-full -ml-10 pl-2  pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="abc@gmail.com"/>
-                            </div>
-                            
-                        </div>
-                            <div class="w-1/3 px-3 mb-5">
-                            <button onClick={savedata} class="block w-full max-w-xs mx-auto bg-green-500 hover:bg-green-700 focus:bg-green-700 text-white rounded-lg px-3 py-3 font-semibold">Save</button>
-                        </div>  
-                    </div>
-                    {/* <div class="flex -mx-3">
-                        <div class="w-full px-3 mb-5">
-                            <button  class="block w-full max-w-xs mx-auto bg-indigo-500 hover:bg-indigo-700 focus:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold">SEND FEEDBACK</button>
-                        </div>
-                    </div> */}
+              <div class="w-1/2 px-3 mb-10">
+                  <label  class="text-xs font-semibold  px-1"> Email</label>
+                  <div class="flex">
+                      <div class="w-10 z-10 pl-1  text-center pointer-events-none flex items-center justify-center"></div>
+                      <input type="email" name='Email' onChange={setdata}  class="w-full -ml-10 pl-2  pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="abc@gmail.com"/>
+                  </div>
+                  
+              </div>
+                  <div class="w-1/3 px-3 mb-5">
+                  <button onClick={savedata} class="block w-full max-w-xs mx-auto bg-green-500 hover:bg-green-700 focus:bg-green-700 text-white rounded-lg px-3 py-3 font-semibold">Save</button>
+              </div>  
+          </div>
+</>)}
+    
+
+       
+
                 </div>
             </div>
         </div>
@@ -173,76 +464,116 @@ if (token) {
                         <thead>
                             <tr>
                                 <th class="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-blue-500 tracking-wider">ID</th>
+                                <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Profile</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Name</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Number</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Email</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Link</th>
                             </tr>
                         </thead>
-                        {initial_data.map((result,index)=>{
-                           const link = `https://payclickfeedback.vercel.app/${result._id}`;
-                            return(<>
-                              <tbody class="bg-white">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
-                                        <div class="flex items-center">
-                                            <div>
-                                                <div class="text-sm leading-5 text-gray-800">#{index +1}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
-                                        <div class="text-sm leading-5 whitespace-nowrap text-blue-900">{result.Name}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
-                                        <div class="text-sm leading-5 whitespace-nowrap text-blue-900">{result.Number}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-no-wrap border-b text-blue-900 border-gray-500 text-sm whitespace-nowrap leading-5">{result.Email}</td>
-                                    <td className="px-6 py-4 border-b border-gray-500 text-sm leading-5">
-                      <div className="truncate w-16" title={link}>{link}</div>
-                    </td>
-                    <td className="px-6 py-4 border-b border-gray-500 text-right">
-                      <button
-                        onClick={() => copyToClipboard(link, index)}
-                        className={`py-1 px-2 rounded ${
-                          copiedIndex === index ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-700'
-                        } text-white font-bold`}>
-                        {copiedIndex === index ? 'Copied' : 'Copy Link'}
-                      </button>
-                    </td>
-                    <td class=" py-4 whitespace-no-wrap   leading-5">
-                                      <button onClick={async()=>{
-                                        try {
-                                          const con = confirm("Have you confirm to delete...");
-                                          if(con){
-                                            await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_team_member/${result._id}`)
-                                            alert("success..")
-                                            verifyUser();
-                                          }
-                                       
-                                        } catch (error) {
-                                          alert(error);
-                                        }
-                                      }} className='text-red-500'>Remove</button>
-                                    </td>
-                    {/* {(copiedIndex)?(<>
-                      <td className="px-6 py-4 border-b border-gray-500 text-right">
-                      <button onClick={() => copyToClipboard(link)} className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
-                        Link
-                      </button>
-                    </td>
-                    </>):(<>
-                    <td className="px-6 py-4 border-b border-gray-500 text-right">
-                      <button onClick={() => copyToClipboard(link)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
-                        Copy Link
-                      </button>
-                    </td>
-                    </>)} */}
-                          </tr>
+                        {initial_data.map((result, index) => {
+        const link = `https://payclickfeedback.vercel.app/${result._id}`;
 
+        return (
+          <tbody className="bg-white" key={result._id}>
+            <tr>
+              <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                <div className="flex items-center">
+                  <div>
+                    <div className="text-sm leading-5 text-gray-800">#{index + 1}</div>
+                  </div>
+                </div>
+              </td>
 
-                        </tbody>
-                        </>)})}
+              {(result.Profile !== undefined) ? (
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                  <div className="text-sm leading-5 whitespace-nowrap text-blue-900">
+                    {downloadUrls[result._id] ? (
+                      <img src={downloadUrls[result._id]} alt={result.Name} className="w-10 rounded-full h-10" />
+                    ) : (
+                      <p>Loading...</p>
+                    )}
+                  </div>
+                </td>
+              ) : (
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                  <div className="text-sm leading-5 whitespace-nowrap text-blue-900"></div>
+                </td>
+              )}
+
+              <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                <div className="text-sm leading-5 whitespace-nowrap text-blue-900">{result.Name}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                <div className="text-sm leading-5 whitespace-nowrap text-blue-900">{result.Number}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-no-wrap border-b text-blue-900 border-gray-500 text-sm whitespace-nowrap leading-5">
+                {result.Email}
+              </td>
+              <td className="px-6 py-4 border-b border-gray-500 text-sm leading-5">
+                <div className="truncate w-16" title={link}>{link}</div>
+              </td>
+              <td className="px-6 py-4 border-b border-gray-500 text-right">
+                <button
+                  onClick={() => copyToClipboard(link, index)}
+                  className={`py-1 px-2 rounded ${
+                    copiedIndex === index ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-700'
+                  } text-white font-bold`}>
+                  {copiedIndex === index ? 'Copied' : 'Copy Link'}
+                </button>
+              </td>
+              <td className="py-4 whitespace-no-wrap leading-5">
+                <button
+                  onClick={async () => {
+                    window.scroll({top:0})
+                setEditData({
+                  tid:result._id,
+                  Name:result.Name,
+                  Number:result.Number,
+                  Email:result.Email,
+                })
+                SetPastProfileName(result.Profile)
+                SetPastProfile(downloadUrls[result._id])
+                
+                setEditBool(true);
+   
+                        // await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member_member/${result._id}`,{
+                          
+                        // });
+                        // alert("success..");
+                        // verifyUser();
+                      
+                  }}
+                  className="text-green-500">
+                 Edit
+                </button>
+              </td>
+              <td className="py-4 whitespace-no-wrap leading-5">
+                <button
+                  onClick={async () => {
+                    try {
+                      const con = confirm("Have you confirm to delete...");
+                      if (con) {
+                        await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_team_member/${result._id}`);
+                        alert("success..");
+                        const storage = getStorage();
+                        const desertRef = ref(storage,`files/${result.Profile}`);
+                        await deleteObject(desertRef)
+                        verifyUser();
+                      }
+                    } catch (error) {
+                      alert(error);
+                    }
+                  }}
+                  className="text-red-500">
+                  Remove
+                </button>
+              </td>
+            
+            </tr>
+          </tbody>
+        );
+      })}
                   
                     </table>
 

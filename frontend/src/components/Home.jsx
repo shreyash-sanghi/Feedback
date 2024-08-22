@@ -69,9 +69,13 @@ const [tokdata,set_tok_data] = useState({})
           let day = date.getDate();
           let month = date.getMonth() + 1;
           let year = date.getFullYear();
+          let hour = date.getHours();
+          let min = date.getMinutes();
+      
               let currentDate = `${day}-${month}-${year}`;
+              let currentTime= `${hour}:${min}`;
          await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
-            Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
+            Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped,FeedbackTime:currentTime
          })
         alert("Thankyou For You Feedback...")
         window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
