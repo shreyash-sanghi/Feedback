@@ -35,81 +35,111 @@ app.get("/",(req,res)=>{
     res.send("Hello My name is shreyash jain ");
 })
 
-app.post("/send_feedback/:id",async(req,res)=>{
- const {Name,Number,Rating,Suggestions,FeedbackDate,TeamHelped} = req.body;
- const apiUrl = 'https://whatsbot.tech/api/send_sms';
- const apiToken = process.env.otp_api_token; // Replace with your WhatsBot API key
- const mobile = `91${Number}`;
-const message = `
+function parseDateString(dateString) {
+    const [day, month, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+app.post("/send_feedback/:id", async (req, res) => {
+   
+    const { Name, Number, Rating, Suggestions, FeedbackDate, TeamHelped } = req.body;
+
+    const apiUrl = 'https://whatsbot.tech/api/send_sms';
+    const apiToken = process.env.otp_api_token;
+    const mobile = `91${Number}`;
+    const message = `
 Hi ${Name}
 
 Thank you for taking the time to share your feedback with us! We truly value your input, as it helps us improve and serve you better.
 
-Best regards
-Pay Click
-`;
-    // Disable SSL certificate verification
+Powered By :- Pay Click Online Services
+    `;
+
     const agent = new https.Agent({
         rejectUnauthorized: false
     });
-  try {
-    const response = await axios.get(apiUrl, {
-      params: {
-        api_token: apiToken,  // API token from WhatsBot
-        mobile: mobile,       // Customer's WhatsApp number
-        message: message      // Message content
-      },
-      httpsAgent: agent  // Attach the https agent to disable SSL verification
-    });
 
-    // Handle response from the WhatsBot API
-    // if (response.data.status === 'success') {
-      try {
-        const id = req.params.id;
-        const result = await Team.findById(id);  // Find the team by ID
-        // Save the feedback to the database
-        await FeedbackMessage.create({
-          Name,
-          Number,
-          Rating,
-          Suggestions,
-          MemberName: result.Name,  // Associate with team member's name
-          FeedbackDate,
-          TeamHelped
+    try {
+        // Convert incoming FeedbackDate to a Date object
+        const feedbackDateObject = parseDateString(FeedbackDate);
+
+        // Check if the user has already submitted feedback this month
+        const currentMonth = feedbackDateObject.getMonth();
+        const currentYear = feedbackDateObject.getFullYear();
+
+        const existingFeedback = await FeedbackMessage.findOne({
+            Number,
+            MonthDate: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1)
+            }
         });
-      const num =result.Number;
-     const teamNumber = `91${num}`
-     const messageForTeam = `
-Hi ${result.Name}
+        if (existingFeedback) {
+            return res.status(400).json({ message: "You have already submitted feedback this month." });
+        }
+        try {
+            const id = req.params.id;
+            const result = await Team.findById(id);
 
-${Name} gave a rating of  ${Rating} out of 10 and you help in ${TeamHelped} and their Suggestion is ${Suggestions}
+            await FeedbackMessage.create({
+                Name,
+                Number,
+                Rating,
+                Suggestions,
+                MemberName: result.Name,
+                FeedbackDate: FeedbackDate, // Save as a Date object
+                MonthDate:feedbackDateObject,
+                TeamHelped
+            });
+        // If no feedback found for this month, proceed with sending the SMS and saving the feedback
+        await axios.get(apiUrl, {
+            params: {
+                api_token: apiToken,
+                mobile: mobile,
+                message: message
+            },
+            httpsAgent: agent
+        });
 
-Date :- ${FeedbackDate}
-     `
-      await axios.get(apiUrl, {
-        params: {
-          api_token: apiToken,  // API token from WhatsBot
-          mobile: teamNumber,       // Customer's WhatsApp number
-          message: messageForTeam      // Message content
-        },
-        httpsAgent: agent  // Attach the https agent to disable SSL verification
-      });
+            const num = result.Number;
+            const teamNumber = `91${num}`;
+            const messageForTeam = `
+            Hi ${result.Name}
 
-        res.sendStatus(202);  // Respond with 202 Accepted
-      } catch (error) {
-        console.error('Error saving feedback:', error);
-        res.sendStatus(404);  // Respond with 404 Not Found if team is not found
-      }
-    // } else {
-    //   console.log('WhatsBot API error:', response.data.message);
-    //   res.json({ success: false, error: response.data.message });
-    // }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
+            ${Name} gave a rating of ${Rating} out of 10 and you helped in ${TeamHelped} and their suggestion is ${Suggestions}
 
-})  
+            Date: ${FeedbackDate}
+            `;
+
+            await axios.get(apiUrl, {
+                params: {
+                    api_token: apiToken,
+                    mobile: teamNumber,
+                    message: messageForTeam
+                },
+                httpsAgent: agent
+            });
+
+            res.sendStatus(202);  // Respond with 202 Accepted
+        } catch (error) {
+            console.error('Error saving feedback:', error);
+            res.sendStatus(404);  // Respond with 404 Not Found if the team is not found
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
+// Function to parse date string in dd-mm-yyyy format
+function parseDateString(dateString) {
+    const [day, month, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+
+
 
 app.delete("/delete_feedback/:id",async(req,res)=>{
     try {
@@ -191,11 +221,26 @@ app.post("/verify_key",(req,res)=>{
     }
 }) 
 
+app.post("/edit_team_member/:id",auth,async(req,res)=>{
+    try {
+        const id = req.params.id;
+        const {Name,Number,Email,Profile}= req.body;
+        const response = await Team.findOneAndUpdate({_id:id},{
+            Name,Number,Email,Profile
+        })
+        console.log("success")
+        res.sendStatus(202)
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(404);
+    }
+})  
 app.post("/add_team",auth,async(req,res)=>{
     try {
-        const {Name,Number,Email}= req.body;
-        console.log(Name,Number,Email)
-        const response = await Team.create({Name,Number,Email});
+        const {Name,Number,Email,Profile}= req.body;
+        console.log(Profile)
+        const response = await Team.create({Name,Number,Email,Profile});
+        console.log("success")
         res.sendStatus(202)
     } catch (error) {
         console.log(error)
@@ -209,6 +254,7 @@ try {
     const response = await OtpData.findById(id);
         res.status(202).json({response})
 } catch (error) {
+    console.log(error)
     res.sendStatus(404);
 }
 })

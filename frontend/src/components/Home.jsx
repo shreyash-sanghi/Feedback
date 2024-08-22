@@ -80,8 +80,13 @@ const [tokdata,set_tok_data] = useState({})
         
 
        } catch (error) {
-        console.log(error)
-           alert(error)
+        if(error.response.status === 400){
+
+          alert(error.response.data.message)
+        }else{
+          alert(error)
+
+        }
         // alert("They have some error...")
        }
     }
