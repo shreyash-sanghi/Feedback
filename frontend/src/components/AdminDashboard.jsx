@@ -184,7 +184,7 @@ export default function AdminDashboard() {
           } catch (error) {
             console.log(error.response.status);
             if(error.response.status===401){
-              navigate(`/dashboard`)
+              navigate(`/login_dashboard`)
             }else{
               alert(error);
 
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
     <div>
       <div className='flex sm:flex-row flex-col items-center justify-between bg-black text-white'>
       <div class="flex ml-10 mr-8">
-            <Link to={`/admin_dashboard`} class="no-underline  text-xl font-semibold  md:text-blue-dark flex items-center py-4 sm:pr-20">
+            <Link to={`/dashboard`} class="no-underline  text-xl font-semibold  md:text-blue-dark flex items-center py-4 sm:pr-20">
               <svg class="h-6 w-6 fill-current mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3.889 3h6.222a.9.9 0 0 1 .889.91v8.18a.9.9 0 0 1-.889.91H3.89A.9.9 0 0 1 3 12.09V3.91A.9.9 0 0 1 3.889 3zM3.889 15h6.222c.491 0 .889.384.889.857v4.286c0 .473-.398.857-.889.857H3.89C3.398 21 3 20.616 3 20.143v-4.286c0-.473.398-.857.889-.857zM13.889 11h6.222a.9.9 0 0 1 .889.91v8.18a.9.9 0 0 1-.889.91H13.89a.9.9 0 0 1-.889-.91v-8.18a.9.9 0 0 1 .889-.91zM13.889 3h6.222c.491 0 .889.384.889.857v4.286c0 .473-.398.857-.889.857H13.89C13.398 9 13 8.616 13 8.143V3.857c0-.473.398-.857.889-.857z"/></svg>              Dashboard
             </Link>
           </div>
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
            onClick={
             ()=>{
               sessionStorage.removeItem("token");
-               navigate('/dashboard')   
+               navigate('/login_dashboard')   
             }
            }
             className='px-4 l m-2 cursor-pointer duration-300 '

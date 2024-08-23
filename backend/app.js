@@ -12,13 +12,13 @@ const auth = require("./src/mideal/auth")
 const axios = require('axios');
 const https= require("https")
 app.use(cors({
-    origin:"https://payclickfeedback.vercel.app",
+    origin:"http://localhost:5174",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
     credential:true
 }))
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', "https://payclickfeedback.vercel.app",);
+    res.header('Access-Control-Allow-Origin', "http://localhost:5174",);
     res.header('Access-Control-Allow-Credentials', "true");
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
@@ -74,9 +74,9 @@ Powered By :- Pay Click Online Services
                 $lt: new Date(currentYear, currentMonth + 1, 1)
             }
         });
-        if (existingFeedback) {
-            return res.status(400).json({ message: "You have already submitted feedback this month." });
-        }
+        // if (existingFeedback) {
+        //     return res.status(400).json({ message: "You have already submitted feedback this month." });
+        // }
         try {
             const id = req.params.id;
             const result = await Team.findById(id);

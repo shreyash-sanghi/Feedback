@@ -35,7 +35,7 @@ export default function FeedbackDashboard() {
     } catch (error) {
       console.log(error.response.status);
       if (error.response.status === 401) {
-        navigate(`/dashboard`);
+        navigate(`/login_dashboard`);
       } else {
         alert(error);
       }
@@ -68,7 +68,6 @@ export default function FeedbackDashboard() {
   // Function to handle filtering based on both date and member name
   const handleFilters = () => {
     let filtered = initial_data;
-
     if (filterDate) {
       const formattedFilterDate = dayjs(filterDate).format('YYYY-MM-DD');
       filtered = filtered.filter((result) => {
@@ -133,7 +132,7 @@ export default function FeedbackDashboard() {
    
       <div className='flex sm:flex-row flex-col items-center justify-between bg-black text-white'>
         <div className="flex flex-wrap items-center w-full sm:w-fit justify-between  ml-10 mr-8">
-          <Link to={`/admin_dashboard`} className="no-underline text-xl font-semibold md:text-blue-dark flex items-center py-4 sm:pr-20">
+          <Link to={`/dashboard`} className="no-underline text-xl font-semibold md:text-blue-dark flex items-center py-4 sm:pr-20">
             <svg className="h-6 w-6 fill-current sm:mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M3.889 3h6.222a.9.9 0 0 1 .889.91v8.18a.9.9 0 0 1-.889.91H3.89A.9.9 0 0 1 3 12.09V3.91A.9.9 0 0 1 3.889 3zM3.889 15h6.222c.491 0 .889.384.889.857v4.286c0 .473-.398.857-.889.857H3.89C3.398 21 3 20.616 3 20.143v-4.286c0-.473.398-.857.889-.857zM13.889 11h6.222a.9.9 0 0 1 .889.91v8.18a.9.9 0 0 1-.889.91H13.89a.9.9 0 0 1-.889-.91v-8.18a.9.9 0 0 1 .889-.91zM13.889 3h6.222c.491 0 .889.384.889.857v4.286c0 .473-.398.857-.889.857H13.89C13.398 9 13 8.616 13 8.143V3.857c0-.473.398-.857.889-.857z" />
             </svg>
@@ -196,7 +195,7 @@ export default function FeedbackDashboard() {
           <button
             onClick={() => {
               sessionStorage.removeItem("token");
-              navigate('/dashboard');
+              navigate('/login_dashboard');
             }}
             className='px-4 l m-2 cursor-pointer duration-300'
           >
@@ -252,6 +251,7 @@ export default function FeedbackDashboard() {
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Number</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Rating</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Suggestions</th>
+                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Feedback Time</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Feedback Date</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Member Name</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider"></th>
@@ -265,6 +265,7 @@ export default function FeedbackDashboard() {
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.Number}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.Rating}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.Suggestions}</td>
+                  <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.FeedbackTime}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.FeedbackDate}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.MemberName}</td>
                   <td className="px-6 py-4 whitespace-no-wrap leading-5">
