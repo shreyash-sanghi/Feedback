@@ -22,8 +22,8 @@ const [tokdata,set_tok_data] = useState({})
         TeamHelped:"",
 
     })
-    const [iniOTP,setOTP] = useState();
-    const [gernateOtp,realOtp] = useState();
+    // const [iniOTP,setOTP] = useState();
+    // const [gernateOtp,realOtp] = useState();
     const setdata = (e)=>{
         const {name,value} = e.target;
         final((info)=>{
@@ -43,10 +43,10 @@ const [tokdata,set_tok_data] = useState({})
        try {
         const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
         console.log(token);
-        if(token === null || token === undefined){
-           sendOtp();
-        }
-        else{ 
+        // if(token === null || token === undefined){
+        //    sendOtp();
+        // }
+        // else{ 
         if(Name === ""){
             alert("Please Enter Your Name... ")
             return;
@@ -80,7 +80,7 @@ const [tokdata,set_tok_data] = useState({})
         alert("Thankyou For You Feedback...")
         window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
     }
-        }
+        // }
         
 
        } catch (error) {
@@ -99,95 +99,95 @@ const [tokdata,set_tok_data] = useState({})
         const handleOpen = (value) => setSize(value);
 
              //gernate otp
-	 const gernate_otp = ()=>{
-    const length =6;
-    let otp=""
-    for(let i=0;i<length;i++ ){
-      otp += Math.floor(Math.random()*10);
-    }
-    return otp;
-}
+// 	 const gernate_otp = ()=>{
+//     const length =6;
+//     let otp=""
+//     for(let i=0;i<length;i++ ){
+//       otp += Math.floor(Math.random()*10);
+//     }
+//     return otp;
+// }
 
-const sendOtp = async()=>{
-  const Number = initial.Number;
-  const otp = gernate_otp();
-  const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_otp`,{
-    OTP:otp,Number
-  })
-  realOtp(otp);
-   setTimeout(()=>{
-     handleOpen("xxl");
-   },2000)
-}
+// const sendOtp = async()=>{
+//   const Number = initial.Number;
+//   const otp = gernate_otp();
+//   const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_otp`,{
+//     OTP:otp,Number
+//   })
+//   realOtp(otp);
+//    setTimeout(()=>{
+//      handleOpen("xxl");
+//    },2000)
+// }
 
-const matchOtp = async()=>{
-  if(gernateOtp == iniOTP){
-          try {
-            const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
-            const gettoken = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_token`,{
-              Number,Name
-            });
-            const OneTimeToken = localStorage.setItem("OneTimeToken",gettoken.data.token);
-            if(Name === ""){
-              alert("Please Enter Your Name... ")
-              return;
-          }
-          else if(Number === ""){
-              alert("Please Enter Valid Number... ")
-              return;
-          }
-          else if(Rating === ""){
-              alert("Please Provide Rating... ")
-              return;
-          }
-          else if(TeamHelped === ""){
-              alert("Please fill In what way has my team helped you? ")
-              return;
-          }
-          else{
-            const date = new Date();
+// const matchOtp = async()=>{
+//   if(gernateOtp == iniOTP){
+//           try {
+//             const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
+//             const gettoken = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_token`,{
+//               Number,Name
+//             });
+//             const OneTimeToken = localStorage.setItem("OneTimeToken",gettoken.data.token);
+//             if(Name === ""){
+//               alert("Please Enter Your Name... ")
+//               return;
+//           }
+//           else if(Number === ""){
+//               alert("Please Enter Valid Number... ")
+//               return;
+//           }
+//           else if(Rating === ""){
+//               alert("Please Provide Rating... ")
+//               return;
+//           }
+//           else if(TeamHelped === ""){
+//               alert("Please fill In what way has my team helped you? ")
+//               return;
+//           }
+//           else{
+//             const date = new Date();
   
-            let day = date.getDate();
-            let month = date.getMonth() + 1;
-            let year = date.getFullYear();
-                let currentDate = `${day}-${month}-${year}`;
-           await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
-              Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
-           })
-          alert("Thankyou For You Feedback...")
-          window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
-      }
-    } catch (error) {
-      alert("One Time authentication have been failed...")
-    }
-  }
-  else{
-    alert("please Enter correct OTP...");
-  }
- }
+//             let day = date.getDate();
+//             let month = date.getMonth() + 1;
+//             let year = date.getFullYear();
+//                 let currentDate = `${day}-${month}-${year}`;
+//            await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+//               Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
+//            })
+//           alert("Thankyou For You Feedback...")
+//           window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
+//       }
+//     } catch (error) {
+//       alert("One Time authentication have been failed...")
+//     }
+//   }
+//   else{
+//     alert("please Enter correct OTP...");
+//   }
+//  }
 
-const verifyToken = async()=>{
-  try{
-    if(token != null){
-      axios.defaults.headers.common["Authorization"] = token;
-      const check  = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/Check_token`);
-      final((prevState) => ({
-        ...prevState,
-        Name: check.data.response.Name,    
-        Number: check.data.response.Number,
-      }));
-    }}catch(error){
-      if(error.request.status === 401){
-        localStorage.removeItem("OneTimeToken")
-      }else{
-        alert(error);
-      }
-    }
-}
+// const verifyToken = async()=>{
+//   try{
+//     if(token != null){
+//       axios.defaults.headers.common["Authorization"] = token;
+//       const check  = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/Check_token`);
+//       final((prevState) => ({
+//         ...prevState,
+//         Name: check.data.response.Name,    
+//         Number: check.data.response.Number,
+//       }));
+//     }}catch(error){
+//       if(error.request.status === 401){
+//         localStorage.removeItem("OneTimeToken")
+//       }else{
+//         alert(error);
+//       }
+//     }
+// }
 
- useEffect(()=>{
-  verifyToken()
- },[])
+//  useEffect(()=>{
+//   verifyToken()
+//  },[])
 
   return (
 <>
@@ -506,12 +506,12 @@ const verifyToken = async()=>{
                 class="group text-blue-400 transition-all duration-100 ease-in-out"
                 href="#"
               >
-                <button
+                {/* <button
                 onClick={()=>sendOtp()}
                   class="cursor-pointer mx-2 bg-left-bottom bg-gradient-to-r from-blue-400 to-blue-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-500 ease-out"
                 >
                   resend otp
-                </button>
+                </button> */}
               </a>
             </p>
           </div>
