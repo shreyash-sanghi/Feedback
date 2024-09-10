@@ -150,7 +150,7 @@ app.delete("/delete_feedback/:id",async(req,res)=>{
         await FeedbackMessage.findByIdAndDelete(id);
         res.sendStatus(202);
     } catch (error) {
-        console.log(error)
+
         res.sendStatus(404);
     }
 })  
@@ -161,7 +161,7 @@ app.delete("/delete_team_member/:id",async(req,res)=>{
         await Team.findByIdAndDelete(id);
         res.sendStatus(202);
     } catch (error) {
-        console.log(error)
+
         res.sendStatus(404);
     }
 })  
@@ -213,8 +213,6 @@ app.post("/verify_key",async(req,res)=>{
         const key = req.body.key;
         const Email = req.body.Email;
         const data = await Team.findOne({Email});
-        console.log(data)
-        console.log(Email)
         if(data == null && Email == process.env.Owner_Email){
             const password = await bcrypt.hash(key,10);
           const result =  await Team.create({Email,Key:password,Position:"Admin",Name:"Rohit Jain"});
@@ -227,7 +225,6 @@ app.post("/verify_key",async(req,res)=>{
             }
             else{
                 const verify = await bcrypt.compare(key,data.Key);
-                console.log(verify);
                 if(verify){
                     const Token = jwt.sign({_id:data._id},process.env.SectetKey);
                     res.status(202).json({Token:Token,OwnerEmail:process.env.Owner_Email});
@@ -237,7 +234,7 @@ app.post("/verify_key",async(req,res)=>{
             }
         }
     } catch (error) {
-        console.log(error);
+
         res.status(404).json({error});
     }
 }) 
@@ -246,7 +243,7 @@ app.post("/edit_team_member/:id",auth,async(req,res)=>{
     try {
         const id = req.params.id;
         const {Name,Number,Email,Profile}= req.body;
-        console.log(Profile)
+
         if(Profile === undefined  ){
             const response = await Team.findOneAndUpdate({_id:id},{
                 Name,Number,Email
@@ -256,10 +253,9 @@ app.post("/edit_team_member/:id",auth,async(req,res)=>{
                 Name,Number,Email,Profile
             })
         }
-        console.log("success")
         res.sendStatus(202)
     } catch (error) {
-        console.log(error)
+
         res.sendStatus(404);
     }
 })  
@@ -270,15 +266,14 @@ app.post("/add_team",auth,async(req,res)=>{
         await Team.create({Name,Number,Email,Profile,Key:password,Position:"Staf"});
         res.sendStatus(202)
     } catch (error) {
-        console.log(error)
+
         res.sendStatus(404);
     }
 })  
 app.post("/update_team_account",auth,async(req,res)=>{
     try {
         const {Name,Number,Email,Profile}= req.body;
-        console.log(Profile)
-        console.log(Number)
+ 
         const id = res.id;
         if(Profile== undefined){
             await Team.findOneAndUpdate({_id:id},{Name,Number,Email});
@@ -287,7 +282,7 @@ app.post("/update_team_account",auth,async(req,res)=>{
         }
         res.sendStatus(202)
     } catch (error) {
-        console.log(error)
+
         res.sendStatus(404);
     }
 })  
@@ -300,7 +295,7 @@ app.post("/update_password/:id",auth,async(req,res)=>{
     
         res.sendStatus(202)
     } catch (error) {
-        console.log(error)
+
         res.sendStatus(404);
     }
 })  
@@ -313,7 +308,6 @@ app.post("/send_pasword_reset_link",async(req,res)=>{
          }else{
             const token = jwt.sign({_id:result._id},process.env.SectetKey);
             const Link = `https://payclickfeedback.vercel.app/reset_password/${token}/${result._id}`;
-            console.log(Link)
             const apiUrl = 'https://whatsbot.tech/api/send_sms';
             const apiToken = process.env.otp_api_token; // Replace with your WhatsBot API key
             const mobile = `91${result.Number}`;
@@ -340,7 +334,6 @@ app.post("/send_pasword_reset_link",async(req,res)=>{
     
         }
     } catch (error) {
-        console.log(error)
         res.status(404).json({error:"They have some error due to bhich link have been not send..."});
     }
 })  
@@ -351,7 +344,6 @@ try {
     const response = await OtpData.findById(id);
         res.status(202).json({response})
 } catch (error) {
-    console.log(error)
     res.sendStatus(404);
 }
 })
