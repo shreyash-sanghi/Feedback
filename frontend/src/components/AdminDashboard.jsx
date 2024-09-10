@@ -15,10 +15,12 @@ export default function AdminDashboard() {
     Email:""
   })
   const [EditBool,setEditBool] = useState(false);
+  
   const [initial,final]= useState({
     Name:"",
     Number:"",
-    Email:""
+    Email:"",
+    Code:""
   })
   const [EditProfile,SetEditProfile] = useState();
   const [PastProfile,SetPastProfile] = useState();
@@ -47,7 +49,7 @@ export default function AdminDashboard() {
 
   const savedata = async()=>{
     try {
-     const {Name,Number,Email} = initial;
+     const {Name,Number,Email,Code} = initial;
     if (profile === undefined){
       alert("Please Uplode Profile...")
     }
@@ -63,13 +65,17 @@ export default function AdminDashboard() {
          alert("Please Provide Email... ")
          return;
      }
+     else if(Code === ""){
+         alert("Please Provide Code... ")
+         return;
+     }
      else{
       const storage = getStorage();
       const image = `${profile.name + v4()}`;
      const imgref = ref(storage,`files/${image}`);
   
       await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/add_team`,{
-        Name,Number,Email,Profile:image
+        Name,Number,Email,Profile:image,Code
       })
       try {
         uploadBytes(imgref,profile)
@@ -187,18 +193,18 @@ export default function AdminDashboard() {
               navigate(`/login_dashboard`)
             }else{
               alert(error);
-
             }
           }
       }
 
         // Array containing navigation items
+ 
         const navItems = [
+          { id: 1, text: 'My Account',path:`/my_account` },
           { id: 1, text: 'My Team',path:`/admin_dashboard` },
           { id: 2, text: 'Feedback Message' , path:`/feedback` },
-
+  
         ];
-
       useEffect(()=>{
         verifyUser();
       },[])
@@ -445,10 +451,19 @@ export default function AdminDashboard() {
                   </div>
                   
               </div>
-                  <div class="w-1/3 px-3 mb-5">
-                  <button onClick={savedata} class="block w-full max-w-xs mx-auto bg-green-500 hover:bg-green-700 focus:bg-green-700 text-white rounded-lg px-3 py-3 font-semibold">Save</button>
-              </div>  
+              <div class="w-1/2 px-3 mb-10">
+                  <label  class="text-xs font-semibold  px-1"> Code</label>
+                  <div class="flex">
+                      <div class="w-10 z-10 pl-1  text-center pointer-events-none flex items-center justify-center"></div>
+                      <input type="password" name='Code' onChange={setdata}  class="w-full -ml-10 pl-2  pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="*******"/>
+                  </div>
+                  
+              </div>
+              
           </div>
+                  <div class=" flex justify-end px-3 mb-5">
+                  <button onClick={savedata} class="block w-1/3 max-w-xs mx-auto bg-green-500 hover:bg-green-700 focus:bg-green-700 text-white rounded-lg px-3 py-3 font-semibold">Save</button>
+              </div>  
 </>)}
     
 

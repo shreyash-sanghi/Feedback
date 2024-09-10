@@ -10,7 +10,8 @@ const OtpData = require("./src/model/Otp")
 const FeedbackMessage = require("./src/model/FeedbackMessage")
 const auth = require("./src/mideal/auth")
 const axios = require('axios');
-const https= require("https")
+const https= require("https");
+const bcrypt = require('bcrypt');
 app.use(cors({
     origin:"https://payclickfeedback.vercel.app",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
@@ -87,6 +88,7 @@ Powered By :- Pay Click Online Services
                 Rating,
                 Suggestions,
                 MemberName: result.Name,
+                MemberEmail: result.Email,
                 FeedbackDate: FeedbackDate, // Save as a Date object
                 MonthDate:feedbackDateObject,
                 TeamHelped,
@@ -206,19 +208,37 @@ app.post("/get_token",async(req,res)=>{
     }
 })  
 
-app.post("/verify_key",(req,res)=>{
+app.post("/verify_key",async(req,res)=>{
     try {
         const key = req.body.key;
-        console.log(key)
-        if(key == process.env.key){
-            const Token = jwt.sign({_id:1},process.env.SectetKey);
-            res.status(202).json({Token:Token});
+        const Email = req.body.Email;
+        const data = await Team.findOne({Email});
+        console.log(data)
+        console.log(Email)
+        if(data == null && Email == process.env.Owner_Email){
+            const password = await bcrypt.hash(key,10);
+          const result =  await Team.create({Email,Key:password,Position:"Admin",Name:"Rohit Jain"});
+                const Token = jwt.sign({_id:result._id},process.env.SectetKey);
+                res.status(202).json({Token:Token,OwnerEmail:process.env.Owner_Email});
         }
         else{
-            res.sendStatus(404);
+            if(data == null ){
+                res.status(404).json({error:"First create account..."})
+            }
+            else{
+                const verify = await bcrypt.compare(key,data.Key);
+                console.log(verify);
+                if(verify){
+                    const Token = jwt.sign({_id:data._id},process.env.SectetKey);
+                    res.status(202).json({Token:Token,OwnerEmail:process.env.Owner_Email});
+                }else{
+                    res.status(404).json({error:"Enter correct id and code "});
+                }
+            }
         }
     } catch (error) {
-        res.sendStatus(404);
+        console.log(error);
+        res.status(404).json({error});
     }
 }) 
 
@@ -245,14 +265,83 @@ app.post("/edit_team_member/:id",auth,async(req,res)=>{
 })  
 app.post("/add_team",auth,async(req,res)=>{
     try {
-        const {Name,Number,Email,Profile}= req.body;
-        console.log(Profile)
-        const response = await Team.create({Name,Number,Email,Profile});
-        console.log("success")
+        const {Name,Number,Email,Profile,Code}= req.body;
+        const password = await bcrypt.hash(Code,10);
+        await Team.create({Name,Number,Email,Profile,Key:password,Position:"Staf"});
         res.sendStatus(202)
     } catch (error) {
         console.log(error)
         res.sendStatus(404);
+    }
+})  
+app.post("/update_team_account",auth,async(req,res)=>{
+    try {
+        const {Name,Number,Email,Profile}= req.body;
+        console.log(Profile)
+        console.log(Number)
+        const id = res.id;
+        if(Profile== undefined){
+            await Team.findOneAndUpdate({_id:id},{Name,Number,Email});
+        }else{
+            await Team.findOneAndUpdate({_id:id},{Name,Number,Email,Profile});
+        }
+        res.sendStatus(202)
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(404);
+    }
+})  
+app.post("/update_password/:id",auth,async(req,res)=>{
+    try {
+        const {Password}= req.body;
+        const id = req.params.id;
+         const Key = await bcrypt.hash(Password,10);
+            await Team.findOneAndUpdate({_id:id},{Key});
+    
+        res.sendStatus(202)
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(404);
+    }
+})  
+app.post("/send_pasword_reset_link",async(req,res)=>{
+    try {
+        const {Email}= req.body;
+         const result = await Team.findOne({Email});
+         if(result == null || result == undefined){
+            res.status(404).json({error:"No account is present.. "});
+         }else{
+            const token = jwt.sign({_id:result._id},process.env.SectetKey);
+            const Link = `https://payclickfeedback.vercel.app/reset_password/${token}/${result._id}`;
+            console.log(Link)
+            const apiUrl = 'https://whatsbot.tech/api/send_sms';
+            const apiToken = process.env.otp_api_token; // Replace with your WhatsBot API key
+            const mobile = `91${result.Number}`;
+           const message = `
+           Reset Password Link 
+           ${Link}
+           
+           Powered By :- Pay Click Online Services
+           `;
+               // Disable SSL certificate verification
+               const agent = new https.Agent({
+                   rejectUnauthorized: false
+               });
+           
+                   const response = await axios.get(apiUrl, {
+                       params: {
+                         api_token: apiToken,  // API token from WhatsBot
+                         mobile: mobile,       // Customer's WhatsApp number
+                         message: message      // Message content
+                       },
+                       httpsAgent: agent  // Attach the https agent to disable SSL verification
+                     });
+                     res.sendStatus(202);
+    
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(404).json({error:"They have some error due to bhich link have been not send..."});
     }
 })  
 
@@ -276,10 +365,37 @@ try {
     res.sendStatus(404);
 }
 })
+app.get("/get_Personal_feedback",auth,async(req,res)=>{
+try {
+    const id = res.id;
+    const memberdata = await Team.findById(id);
+    const response = await FeedbackMessage.find({MemberEmail:memberdata.Email});
+        res.status(202).json({response})
+} catch (error) {
+
+    res.sendStatus(404);
+}
+})
 app.get("/get_team",auth,async(req,res)=>{
 try {
-    const response = await Team.find();
+    const id = res.id;
+    const data = await Team.findById(id);
+    if(data.Email == process.env.Owner_Email){
+        const response = await Team.find({Position : "Staf"});
         res.status(202).json({response})
+    }else{
+        res.sendStatus(401);
+    }
+} catch (error) {
+    res.sendStatus(404);
+}
+})
+
+app.get("/get_myaccount",auth,async(req,res)=>{
+try {
+    const id = res.id;
+    const data = await Team.findById(id);
+        res.status(202).json({response:data})
 } catch (error) {
     res.sendStatus(404);
 }

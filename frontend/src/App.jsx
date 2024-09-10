@@ -6,6 +6,9 @@ import AdminDashboard from './components/AdminDashboard'
 import FeedbackDashboard from './components/FeedbackDashboard'
 import { Navigate } from 'react-router-dom'
 import Dashboard from './components/Dashboard'
+import Account from './components/Account'
+import StafDashboard from './components/StafDashboard'
+import ResetPassword from './components/ResetPassword'
 export default function App() {
   useEffect(() => {
     if (window.location.pathname === '/') {
@@ -20,7 +23,10 @@ export default function App() {
   <Route path='/login_dashboard' Component={AdminVerify}/>
   <Route path='/dashboard' Component={Dashboard}/>
   <Route path='/admin_dashboard' Component={AdminDashboard}/>
+  <Route path='/staf_dashboard' Component={StafDashboard}/>
+  <Route path='/my_account' Component={Account}/>
   <Route path='/feedback' Component={FeedbackDashboard}/>
+  <Route path='/reset_password/:token/:id' Component={ResetPassword}/>
 
 </Routes>
     </div>

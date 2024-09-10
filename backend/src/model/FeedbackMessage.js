@@ -10,6 +10,7 @@ const Events = new mongoose.Schema({
     MonthDate:{type:Date,required:true},
     TeamHelped:{type:String,required:true},
     MemberName:{type:String,required:true},
+    MemberEmail:{type:String,required:true},
 })
 const Event = mongoose.model("FeedbackMessage",Events);  
 module.exports = Event;
