@@ -42,7 +42,7 @@ const [tokdata,set_tok_data] = useState({})
     const savedata = async()=>{
        try {
         const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
-        console.log(token);
+        console.log("token",token);
         // if(token === null || token === undefined){
         //    sendOtp();
         // }
