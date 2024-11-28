@@ -14,7 +14,7 @@ const verifyUser = async () => {
       axios.defaults.headers.common['Authorization'] = token;
     }
     try {
-      const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_feedback`);
+      const result = await axios.get(`https://feedback-backend-zeta.vercel.app/get_feedback`);
       const response = result.data.response;
 
       // Get today's date in 'DD-MM-YYYY' format
@@ -199,7 +199,7 @@ const verifyUser = async () => {
                     <button
                       onClick={async () => {
                         try {
-                          await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`);
+                          await axios.delete(`https://feedback-backend-zeta.vercel.app/delete_feedback/${result._id}`);
                           alert("Feedback removed successfully");
                           verifyUser();
                         } catch (error) {
