@@ -31,7 +31,7 @@ if (token) {
 axios.defaults.headers.common['Authorization'] = token;
 }
       try {
-          const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_myaccount`);
+          const result = await axios.get(`https://feedback-backend-zeta.vercel.app/get_myaccount`);
           // Fetch download URLs for profiles
           const data = result.data.response;
           if(data.Profile != undefined){
@@ -97,7 +97,7 @@ axios.defaults.headers.common['Authorization'] = token;
      }
      else{
       if(profile == undefined){
-        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_team_account`,{
+        await axios.post(`https://feedback-backend-zeta.vercel.app/update_team_account`,{
           Name,Number,Email
          })
       }
@@ -106,12 +106,12 @@ axios.defaults.headers.common['Authorization'] = token;
       const image = `${profile.name + v4()}`;
      const imgref = ref(storage,`files/${image}`);
         if(initial.ProfileUrl == undefined && initial.ProfileName == undefined){
-              await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_team_account`,{
+              await axios.post(`https://feedback-backend-zeta.vercel.app/update_team_account`,{
         Name,Number,Email,Profile:image
        })
         }else{
           const pastProfileRef = ref(storage,`files/${initial.ProfileName}`);
-          await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_team_account`,{
+          await axios.post(`https://feedback-backend-zeta.vercel.app/update_team_account`,{
             Name,Number,Email,Profile:image
           })
           deleteObject(pastProfileRef);
