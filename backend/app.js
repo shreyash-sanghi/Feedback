@@ -13,15 +13,19 @@ const axios = require('axios');
 const https= require("https");
 const bcrypt = require('bcrypt');
 app.use(cors({
-    origin:"https://payclickfeedback.vercel.app",
+    origin:"*",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
     credential:true
 }))
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', "https://payclickfeedback.vercel.app",);
-    res.header('Access-Control-Allow-Credentials', "true");
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    // res.header('Access-Control-Allow-Origin', "https://payclickfeedback.vercel.app",);
+    res.header('Access-Control-Allow-Origin', req.headers.origin,);
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, withCredentials');
+
+    // res.header('Access-Control-Allow-Credentials', "true");
+    // res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
   });
   app.use(express.json());
