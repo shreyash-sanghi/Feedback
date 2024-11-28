@@ -74,7 +74,7 @@ export default function AdminDashboard() {
       const image = `${profile.name + v4()}`;
      const imgref = ref(storage,`files/${image}`);
   
-      await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/add_team`,{
+      await axios.post(`https://feedback-backend-zeta.vercel.app/add_team`,{
         Name,Number,Email,Profile:image,Code
       })
       try {
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         const storage = getStorage();
         const image = `${EditProfile.name + v4()}`;
        const imgref = ref(storage,`files/${image}`);
-       await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+       await axios.post(`https://feedback-backend-zeta.vercel.app/edit_team_member/${tid}`,{
         Name,Number,Email,Profile:image
       })
       try {
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
       }
       }
       else if(PastProfile != undefined && EditProfile === undefined ){
-        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+        await axios.post(`https://feedback-backend-zeta.vercel.app/edit_team_member/${tid}`,{
           Name,Number,Email
         })
       }
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
         await deleteObject(desertRef)
         const image = `${EditProfile.name + v4()}`;
         const imgref = ref(storage,`files/${image}`);
-        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+        await axios.post(`https://feedback-backend-zeta.vercel.app/edit_team_member/${tid}`,{
          Name,Number,Email,Profile:image
        })
        try {
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
     axios.defaults.headers.common['Authorization'] = token;
   }
           try {
-              const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_team`);
+              const result = await axios.get(`https://feedback-backend-zeta.vercel.app/get_team`);
               final_data(result.data.response)
 
               // Fetch download URLs for profiles
@@ -552,7 +552,7 @@ export default function AdminDashboard() {
                 
                 setEditBool(true);
    
-                        // await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member_member/${result._id}`,{
+                        // await axios.post(`https://feedback-backend-zeta.vercel.app/edit_team_member_member/${result._id}`,{
                           
                         // });
                         // alert("success..");
@@ -569,7 +569,7 @@ export default function AdminDashboard() {
                     try {
                       const con = confirm("Have you confirm to delete...");
                       if (con) {
-                        await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_team_member/${result._id}`);
+                        await axios.delete(`https://feedback-backend-zeta.vercel.app/delete_team_member/${result._id}`);
                         alert("success..");
                         const storage = getStorage();
                         const desertRef = ref(storage,`files/${result.Profile}`);
