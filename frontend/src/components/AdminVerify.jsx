@@ -10,7 +10,7 @@ const [videoOpen, setPopOpen] = useState(false);
 const verifyotp = async(e)=>{
     e.preventDefault();
     try {
-        const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/verify_key`,{
+        const response = await axios.post(`https://feedback-backend-zeta.vercel.app/verify_key`,{
           key:code,Email:myemail
         })
         const token = response.data.Token;
@@ -32,7 +32,7 @@ const verifyotp = async(e)=>{
 const sendPasswordResetLink = async(e)=>{
     e.preventDefault();
     try {
-        const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_pasword_reset_link`,{
+        const response = await axios.post(`https://feedback-backend-zeta.vercel.app/send_pasword_reset_link`,{
           Email:myemail
         })
         alert("Password Update Link have been send to your WhatsApp ")
