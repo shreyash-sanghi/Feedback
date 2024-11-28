@@ -74,7 +74,7 @@ const [tokdata,set_tok_data] = useState({})
       
               let currentDate = `${day}-${month}-${year}`;
               let currentTime= `${hour}:${min}`;
-         await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+         await axios.post(`https://feedback-backend-zeta.vercel.app/send_feedback/${id}`,{
             Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped,FeedbackTime:currentTime
          })
         alert("Thankyou For You Feedback...")
@@ -111,7 +111,7 @@ const [tokdata,set_tok_data] = useState({})
 // const sendOtp = async()=>{
 //   const Number = initial.Number;
 //   const otp = gernate_otp();
-//   const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_otp`,{
+//   const response = await axios.post(`https://feedback-backend-zeta.vercel.app/send_otp`,{
 //     OTP:otp,Number
 //   })
 //   realOtp(otp);
@@ -124,7 +124,7 @@ const [tokdata,set_tok_data] = useState({})
 //   if(gernateOtp == iniOTP){
 //           try {
 //             const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
-//             const gettoken = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_token`,{
+//             const gettoken = await axios.post(`https://feedback-backend-zeta.vercel.app/get_token`,{
 //               Number,Name
 //             });
 //             const OneTimeToken = localStorage.setItem("OneTimeToken",gettoken.data.token);
@@ -151,7 +151,7 @@ const [tokdata,set_tok_data] = useState({})
 //             let month = date.getMonth() + 1;
 //             let year = date.getFullYear();
 //                 let currentDate = `${day}-${month}-${year}`;
-//            await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+//            await axios.post(`https://feedback-backend-zeta.vercel.app/send_feedback/${id}`,{
 //               Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
 //            })
 //           alert("Thankyou For You Feedback...")
@@ -170,7 +170,7 @@ const [tokdata,set_tok_data] = useState({})
 //   try{
 //     if(token != null){
 //       axios.defaults.headers.common["Authorization"] = token;
-//       const check  = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/Check_token`);
+//       const check  = await axios.get(`https://feedback-backend-zeta.vercel.app/Check_token`);
 //       final((prevState) => ({
 //         ...prevState,
 //         Name: check.data.response.Name,    
