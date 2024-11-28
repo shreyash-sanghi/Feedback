@@ -14,7 +14,7 @@ function ResetPassword() {
             }
             else{
                 axios.defaults.headers.common["Authorization"] = token;
-                await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_password/${id}`,{
+                await axios.post(`https://feedback-backend-zeta.vercel.app/update_password/${id}`,{
                    Password
                    })
                    navigate("/login_dashboard")
