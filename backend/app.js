@@ -278,7 +278,7 @@ app.post("/update_team_account",auth,async(req,res)=>{
     try {
         const {Name,Number,Email,Profile}= req.body;
  
-        const id = res.id;
+        const id = req.id;
         if(Profile== undefined){
             await Team.findOneAndUpdate({_id:id},{Name,Number,Email});
         }else{
@@ -344,7 +344,7 @@ app.post("/send_pasword_reset_link",async(req,res)=>{
 
 app.get("/Check_token",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const response = await OtpData.findById(id);
         res.status(202).json({response})
 } catch (error) {
@@ -363,7 +363,7 @@ try {
 })
 app.get("/get_Personal_feedback",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const memberdata = await Team.findById(id);
     const response = await FeedbackMessage.find({MemberEmail:memberdata.Email});
         res.status(202).json({response})
@@ -374,7 +374,7 @@ try {
 })
 app.get("/get_team",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const data = await Team.findById(id);
     if(data.Email == process.env.Owner_Email){
         const response = await Team.find({Position : "Staf"});
@@ -389,7 +389,7 @@ try {
 
 app.get("/get_myaccount",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const data = await Team.findById(id);
         res.status(202).json({response:data})
 } catch (error) {
