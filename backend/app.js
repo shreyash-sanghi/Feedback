@@ -13,7 +13,7 @@ const axios = require('axios');
 const https= require("https");
 const bcrypt = require('bcrypt');
 app.use(cors({
-    origin:"https://payclickfeedback.vercel.app",
+    origin:"*",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
     credential:true
 }))
