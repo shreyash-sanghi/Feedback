@@ -13,7 +13,7 @@ const axios = require('axios');
 const https= require("https");
 const bcrypt = require('bcrypt');
 app.use(cors({
-    origin:"*",
+    origin:"https://payclickfeedback.vercel.app",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
     credential:true
 }))
@@ -85,7 +85,6 @@ Powered By :- Pay Click Online Services
         try {
             const id = req.params.id;
             const result = await Team.findById(id);
-console.log("result",result)
             await FeedbackMessage.create({
                 Name,
                 Number,
@@ -111,12 +110,11 @@ console.log("result",result)
             const num = result.Number;
             const teamNumber = `91${num}`;
             const messageForTeam = `
-            Hi ${result.Name}
+Hi ${result.Name}
 
-            ${Name} gave a rating of ${Rating} out of 10 and you helped in ${TeamHelped} and their suggestion is ${Suggestions}
+${Name} gave a rating of ${Rating} out of 10 and you helped in ${TeamHelped} and their suggestion is ${Suggestions}
 
-            Date: ${FeedbackDate}
-            `;
+Date: ${FeedbackDate}`;
 
             await axios.get(apiUrl, {
                 params: {
