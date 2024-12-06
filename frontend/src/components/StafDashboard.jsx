@@ -125,7 +125,7 @@ function StafDashboard() {
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.FeedbackDate}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.MemberName}</td>
                   <td className="px-6 py-4 whitespace-no-wrap leading-5">
-                    <button
+{/*                     <button
                       onClick={async () => {
                         try {
                           await axios.delete(`https://feedback-backend-zeta.vercel.app/delete_feedback/${result._id}`);
@@ -138,7 +138,7 @@ function StafDashboard() {
                       className='text-red-500'
                     >
                       Remove
-                    </button>
+                    </button> */}
                   </td>
                 </tr>
               ))}
