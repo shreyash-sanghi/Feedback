@@ -373,6 +373,7 @@ try {
 app.get("/get_team",auth,async(req,res)=>{
 try {
     const id = req.id;
+
     const data = await Team.findById(id);
     if(data.Email == process.env.Owner_Email){
         const response = await Team.find({Position : "Staf"});
