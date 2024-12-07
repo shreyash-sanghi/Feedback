@@ -373,10 +373,10 @@ try {
 app.get("/get_team",auth,async(req,res)=>{
 try {
     const id = req.id;
-
+console.log(id)
     const data = await Team.findById(id);
     if(data.Email == process.env.Owner_Email){
-        const response = await Team.find({Position : "Staf"});
+        const response = await Team.find();
         res.status(202).json({response})
     }else{
         res.sendStatus(401);
