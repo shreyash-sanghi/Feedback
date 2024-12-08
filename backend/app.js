@@ -13,15 +13,15 @@ const axios = require('axios');
 const https= require("https");
 const bcrypt = require('bcrypt');
 app.use(cors({
-    origin:"https://payclickfeedback.vercel.app",
+    origin:"*",
     methods:["POST", "GET", "PATCH", "PUT", "DELETE"],
     credential:true
 }))
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', "https://payclickfeedback.vercel.app",);
-    res.header('Access-Control-Allow-Credentials', "true");
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Origin', req.headers.origin,);
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, withCredentials');
     next();
   });
   app.use(express.json());
@@ -274,7 +274,7 @@ app.post("/update_team_account",auth,async(req,res)=>{
     try {
         const {Name,Number,Email,Profile}= req.body;
  
-        const id = res.id;
+        const id = req.id;
         if(Profile== undefined){
             await Team.findOneAndUpdate({_id:id},{Name,Number,Email});
         }else{
@@ -340,7 +340,7 @@ app.post("/send_pasword_reset_link",async(req,res)=>{
 
 app.get("/Check_token",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const response = await OtpData.findById(id);
         res.status(202).json({response})
 } catch (error) {
@@ -359,7 +359,7 @@ try {
 })
 app.get("/get_Personal_feedback",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const memberdata = await Team.findById(id);
     const response = await FeedbackMessage.find({MemberEmail:memberdata.Email});
         res.status(202).json({response})
@@ -370,7 +370,7 @@ try {
 })
 app.get("/get_team",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const data = await Team.findById(id);
     if(data.Email == process.env.Owner_Email){
         const response = await Team.find({Position : "Staf"});
@@ -385,7 +385,7 @@ try {
 
 app.get("/get_myaccount",auth,async(req,res)=>{
 try {
-    const id = res.id;
+    const id = req.id;
     const data = await Team.findById(id);
         res.status(202).json({response:data})
 } catch (error) {
