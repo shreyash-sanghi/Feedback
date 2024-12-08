@@ -33,8 +33,12 @@ function Account() {
           const data = result.data.response;
           if(data.Profile != undefined){
             const storage = getStorage();
-            const url = await getDownloadURL(ref(storage, `files/${data.Profile}`));
-            console.log(data)
+            let url =User_profile;
+            try {
+              url = await getDownloadURL(ref(storage, `files/${data.Profile}`));
+            } catch (error) {
+              colsole.log("Image error...")
+            }
             final({   
               tid:data._id,
               Name:data.Name,
@@ -180,6 +184,7 @@ useEffect(()=>{
       </ul>
       </div>
       </>):(<>
+      {(initial.Position === "Staf")&&(<>
         <div className='flex sm:flex-row flex-col items-center justify-between bg-black text-white'>
       <div class="flex ml-10 mr-8">
             <p class="no-underline  text-xl font-semibold  md:text-blue-dark flex items-center py-4 sm:pr-20">
@@ -212,6 +217,7 @@ useEffect(()=>{
           </button>
       </ul>
       </div>
+      </>)}
       </>)}
       <div className='mt-10'>
       {(initial.ProfileUrl === undefined) ? (<>
