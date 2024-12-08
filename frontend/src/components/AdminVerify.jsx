@@ -16,7 +16,7 @@ const verifyotp = async(e)=>{
         })
         const token = response.data.Token;
         const OwnerEmail = response.data.OwnerEmail;
-          sessionStorage.setItem('token', token);
+          localStorage.setItem('token', token);
          if(OwnerEmail == myemail){
            navigate(`/admin_dashboard`)
           }
