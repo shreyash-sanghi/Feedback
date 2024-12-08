@@ -213,7 +213,6 @@ app.post("/verify_key",async(req,res)=>{
         const key = req.body.key;
         const Email = req.body.Email;
         const data = await Team.findOne({Email});
-
         if(data == null && Email == process.env.Owner_Email){
             const password = await bcrypt.hash(key,10);
           const result =  await Team.create({Email,Key:password,Position:"Admin",Name:"Rohit Jain"});
