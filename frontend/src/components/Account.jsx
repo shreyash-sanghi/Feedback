@@ -169,7 +169,7 @@ useEffect(()=>{
         <button
            onClick={
             ()=>{
-              sessionStorage.removeItem("token");
+              localStorage.removeItem("token");
                navigate('/login_dashboard')   
             }
            }
@@ -202,7 +202,7 @@ useEffect(()=>{
         <button
            onClick={
             ()=>{
-              sessionStorage.removeItem("token");
+              localStorage.removeItem("token");
                navigate('/login_dashboard')   
             }
            }
