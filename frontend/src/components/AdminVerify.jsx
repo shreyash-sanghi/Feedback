@@ -15,6 +15,7 @@ const verifyotp = async(e)=>{
           key:code,Email:myemail
         })
         const token = response.data.Token;
+console.log(token)
         const OwnerEmail = response.data.OwnerEmail;
           localStorage.setItem('token', token);
          if(OwnerEmail == myemail){
