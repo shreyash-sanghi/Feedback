@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import axios from "axios"
+import axios from "../api/axios"
 import { useNavigate ,Link} from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Dashboard() {
 const navigate = useNavigate();
@@ -9,12 +10,8 @@ const [feedbackCount, setFeedbackCount] = useState({});
 const [totalCoin, setTotalCoin] = useState({});
 
 const verifyUser = async () => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = token;
-    }
     try {
-      const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_feedback`);
+      const result = await axios.get(`/get_feedback`);
       const response = result.data.response;
 
       // Get today's date in 'DD-MM-YYYY' format
@@ -68,7 +65,7 @@ const verifyUser = async () => {
       if (error.response && error.response.status === 401) {
         navigate(`/login_dashboard`);
       } else {
-        alert(error);
+        toast.error(error);
       }
     }
   };
@@ -199,11 +196,11 @@ const verifyUser = async () => {
                     <button
                       onClick={async () => {
                         try {
-                          await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`);
-                          alert("Feedback removed successfully");
+                          await axios.delete(`/delete_feedback/${result._id}`);
+                          toast.success("Feedback removed successfully");
                           verifyUser();
                         } catch (error) {
-                          alert(error);
+                          toast.error(error);
                         }
                       }}
                       className='text-red-500'

@@ -1,7 +1,8 @@
 import {React,useState,useEffect}from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import axios from "axios"
+import axios from "../api/axios"
+import { toast } from 'react-toastify';
 function StafDashboard() {
     const navigate = useNavigate();
 
@@ -17,12 +18,8 @@ function StafDashboard() {
 
 
       const verifyUser = async () => {
-        const token = sessionStorage.getItem('token');
-        if (token) {
-          axios.defaults.headers.common['Authorization'] = token;
-        }
         try {
-          const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_Personal_feedback`);
+          const result = await axios.get(`/get_Personal_feedback`);
           // Sort the data based on FeedbackDate and FeedbackTime
           const sortedData = result.data.response.sort((a, b) => {
             const aDateTime = dayjs(`${convertDateFormat(a.FeedbackDate)} ${a.FeedbackTime}`);
@@ -35,7 +32,7 @@ function StafDashboard() {
           if (error.response.status === 401) {
             navigate(`/login_dashboard`);
           } else {
-            alert(error);
+           toast.error(error);
           }
         }
       };
@@ -128,11 +125,11 @@ function StafDashboard() {
                     <button
                       onClick={async () => {
                         try {
-                          await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`);
-                          alert("Feedback removed successfully");
+                          await axios.delete(`/delete_feedback/${result._id}`);
+                          toast.success("Feedback removed successfully");
                           verifyUser();
                         } catch (error) {
-                          alert(error);
+                          toast.error(error);
                         }
                       }}
                       className='text-red-500'

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import axios from "axios"
+import axios from "../api/axios"
+import { toast } from 'react-toastify';
 export default function AdminVerify() {
   const navigate = useNavigate();
 const [code,setCode] = useState("");
@@ -10,12 +11,11 @@ const [videoOpen, setPopOpen] = useState(false);
 const verifyotp = async(e)=>{
     e.preventDefault();
     try {
-        const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/verify_key`,{
+        const response = await axios.post(`/verify_key`,{
           key:code,Email:myemail
         })
         const token = response.data.Token;
         const OwnerEmail = response.data.OwnerEmail;
-        axios.defaults.headers.common["Authorization"] = token;
           sessionStorage.setItem('token', token);
          if(OwnerEmail == myemail){
            navigate(`/admin_dashboard`)
@@ -24,22 +24,19 @@ const verifyotp = async(e)=>{
            navigate(`/staf_dashboard`)
          }
     } catch (error) {
-      alert(error.response.data.error)
-        // alert("Please Enter valid Code...")
-        // alert(error)
+      toast.error(error.response?.data?.error || error)
     }
 }
 const sendPasswordResetLink = async(e)=>{
     e.preventDefault();
     try {
-        const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_pasword_reset_link`,{
+        const response = await axios.post(`/send_pasword_reset_link`,{
           Email:myemail
         })
-        alert("Password Update Link have been send to your WhatsApp ")
+        toast.success("Password Update Link have been send to your WhatsApp ")
         setPopOpen(false);
     } catch (error) {
-        // alert("Please Enter valid Code...")
-        alert(error)
+        toast.error(error)
     }
 }
   return (

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../api/axios';
 import React, { useEffect, useState } from 'react'
 import payclick from "../assets/payclick.webp"
 import payclickmobile from "../assets/mobilepay.png"
@@ -10,10 +10,9 @@ import {
 	DialogBody,
 	DialogFooter,
   } from "@material-tailwind/react";
+import { toast } from 'react-toastify';
 export default function Home() {
 const {id} = useParams();
-const token = localStorage.getItem("OneTimeToken");
-const [tokdata,set_tok_data] = useState({})
     const [initial,final] = useState({
         Name:"",
         Number:"",
@@ -27,11 +26,6 @@ const [tokdata,set_tok_data] = useState({})
     const setdata = (e)=>{
         const {name,value} = e.target;
         final((info)=>{
-          if (name === "Number") {
-            if(token != null){
-              localStorage.removeItem("OneTimeToken");
-            }
-          }
             return{
                 ...info,
                 [name] :value
@@ -42,25 +36,24 @@ const [tokdata,set_tok_data] = useState({})
     const savedata = async()=>{
        try {
         const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
-        console.log(token);
         // if(token === null || token === undefined){
         //    sendOtp();
         // }
         // else{ 
         if(Name === ""){
-            alert("Please Enter Your Name... ")
+            toast.error("Please Enter Your Name... ")
             return;
         }
         else if(Number === ""){
-            alert("Please Enter Valid Number... ")
+          toast.error("Please Enter Valid Number... ")
             return;
         }
         else if(Rating === ""){
-            alert("Please Provide Rating... ")
+            toast.error("Please Provide Rating... ")
             return;
         }
         else if(TeamHelped === ""){
-            alert("Please fill In what way has my team helped you? ")
+            toast.error("Please fill In what way has my team helped you? ")
             return;
         }
         else{
@@ -74,10 +67,10 @@ const [tokdata,set_tok_data] = useState({})
       
               let currentDate = `${day}-${month}-${year}`;
               let currentTime= `${hour}:${min}`;
-         await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+         await axios.post(`/send_feedback/${id}`,{
             Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped,FeedbackTime:currentTime
          })
-        alert("Thankyou For You Feedback...")
+        toast.success("Thankyou For You Feedback...")
         window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
     }
         // }
@@ -86,12 +79,11 @@ const [tokdata,set_tok_data] = useState({})
        } catch (error) {
         if(error.response.status === 400){
 
-          alert(error.response.data.message)
+          toast.error(error.response?.data?.message || error)
         }else{
-          alert(error)
+          toast.error(error)
 
         }
-        // alert("They have some error...")
        }
     }
 	      //Pop UP
@@ -111,7 +103,7 @@ const [tokdata,set_tok_data] = useState({})
 // const sendOtp = async()=>{
 //   const Number = initial.Number;
 //   const otp = gernate_otp();
-//   const response = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_otp`,{
+//   const response = await axios.post(`/send_otp`,{
 //     OTP:otp,Number
 //   })
 //   realOtp(otp);
@@ -124,7 +116,7 @@ const [tokdata,set_tok_data] = useState({})
 //   if(gernateOtp == iniOTP){
 //           try {
 //             const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
-//             const gettoken = await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_token`,{
+//             const gettoken = await axios.post(`/get_token`,{
 //               Number,Name
 //             });
 //             const OneTimeToken = localStorage.setItem("OneTimeToken",gettoken.data.token);
@@ -151,7 +143,7 @@ const [tokdata,set_tok_data] = useState({})
 //             let month = date.getMonth() + 1;
 //             let year = date.getFullYear();
 //                 let currentDate = `${day}-${month}-${year}`;
-//            await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/send_feedback/${id}`,{
+//            await axios.post(`/send_feedback/${id}`,{
 //               Name,Number,Rating, Suggestions,FeedbackDate:currentDate,TeamHelped
 //            })
 //           alert("Thankyou For You Feedback...")
@@ -170,7 +162,7 @@ const [tokdata,set_tok_data] = useState({})
 //   try{
 //     if(token != null){
 //       axios.defaults.headers.common["Authorization"] = token;
-//       const check  = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/Check_token`);
+//       const check  = await axios.get(`/Check_token`);
 //       final((prevState) => ({
 //         ...prevState,
 //         Name: check.data.response.Name,    

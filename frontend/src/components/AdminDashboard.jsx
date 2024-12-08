@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import axios from "axios"
+import axios from "../api/axios.js"
 import { useNavigate ,Link} from 'react-router-dom';
 import { imageDb } from "./Config.js";
 import { ref, uploadBytes,deleteObject ,getDownloadURL,getStorage} from "firebase/storage";   
 import User_profile from "../assets/user_profile.jpg"
 import {v4} from 'uuid';
+import { toast } from 'react-toastify';
 export default function AdminDashboard() {
   const [initial_data, final_data] = useState([]);
   const [downloadUrls, setDownloadUrls] = useState({});
@@ -51,22 +52,22 @@ export default function AdminDashboard() {
     try {
      const {Name,Number,Email,Code} = initial;
     if (profile === undefined){
-      alert("Please Uplode Profile...")
+      toast.error("Please Uplode Profile...")
     }
     else if(Name === ""){
-         alert("Please Enter Your Name... ")
+         toast.error("Please Enter Your Name... ")
          return;
      }
      else if(Number === ""){
-         alert("Please Enter Valid Number... ")
+         toast.error("Please Enter Valid Number... ")
          return;
      }
      else if(Email === ""){
-         alert("Please Provide Email... ")
+         toast.error("Please Provide Email... ")
          return;
      }
      else if(Code === ""){
-         alert("Please Provide Code... ")
+         toast.error("Please Provide Code... ")
          return;
      }
      else{
@@ -74,7 +75,7 @@ export default function AdminDashboard() {
       const image = `${profile.name + v4()}`;
      const imgref = ref(storage,`files/${image}`);
   
-      await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/add_team`,{
+      await axios.post(`/add_team`,{
         Name,Number,Email,Profile:image,Code
       })
       try {
@@ -86,29 +87,28 @@ export default function AdminDashboard() {
           return;
       }
       verifyUser()
-     alert("Success...")
+     toast.success("Success...")
  }
     } catch (error) {
-     alert(error)
-    //  alert("They have some error...")
+     toast.error(error)
     }
  }
   const saveupdatedata = async()=>{
     try {
      const {Name,Number,Email,tid} = EditData;
     if (PastProfile === undefined && EditProfile === undefined){
-      alert("Please Uplode Profile...")
+      toast.error("Please Uplode Profile...")
     }
     else if(Name === ""){
-         alert("Please Enter Your Name... ")
+         toast.error("Please Enter Your Name... ")
          return;
      }
      else if(Number === ""){
-         alert("Please Enter Valid Number... ")
+         toast.error("Please Enter Valid Number... ")
          return;
      }
      else if(Email === ""){
-         alert("Please Provide Email... ")
+         toast.error("Please Provide Email... ")
          return;
      }
      else{
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         const storage = getStorage();
         const image = `${EditProfile.name + v4()}`;
        const imgref = ref(storage,`files/${image}`);
-       await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+       await axios.post(`/edit_team_member/${tid}`,{
         Name,Number,Email,Profile:image
       })
       try {
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
       }
       }
       else if(PastProfile != undefined && EditProfile === undefined ){
-        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+        await axios.post(`/edit_team_member/${tid}`,{
           Name,Number,Email
         })
       }
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
         await deleteObject(desertRef)
         const image = `${EditProfile.name + v4()}`;
         const imgref = ref(storage,`files/${image}`);
-        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member/${tid}`,{
+        await axios.post(`/edit_team_member/${tid}`,{
          Name,Number,Email,Profile:image
        })
        try {
@@ -150,22 +150,17 @@ export default function AdminDashboard() {
   
 
       verifyUser()
-     alert("Success...")
+     toast.success("Success...")
  }
     } catch (error) {
-     alert(error)
-    //  alert("They have some error...")
+     toast.error(error)
     }
  }
 
 
       const verifyUser = async()=>{
-        const token = sessionStorage.getItem('token');
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = token;
-  }
           try {
-              const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_team`);
+              const result = await axios.get(`/get_team`);
               final_data(result.data.response)
 
               // Fetch download URLs for profiles
@@ -192,7 +187,7 @@ export default function AdminDashboard() {
             if(error.response.status===401){
               navigate(`/login_dashboard`)
             }else{
-              alert(error);
+              toast.error(error);
             }
           }
       }
@@ -550,14 +545,6 @@ export default function AdminDashboard() {
                 SetPastProfileName(result.Profile)
                 SetPastProfile(downloadUrls[result._id])
                 
-                setEditBool(true);
-   
-                        // await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/edit_team_member_member/${result._id}`,{
-                          
-                        // });
-                        // alert("success..");
-                        // verifyUser();
-                      
                   }}
                   className="text-green-500">
                  Edit
@@ -569,15 +556,15 @@ export default function AdminDashboard() {
                     try {
                       const con = confirm("Have you confirm to delete...");
                       if (con) {
-                        await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_team_member/${result._id}`);
-                        alert("success..");
+                        await axios.delete(`/delete_team_member/${result._id}`);
+                        toast.success("success..");
                         const storage = getStorage();
                         const desertRef = ref(storage,`files/${result.Profile}`);
                         await deleteObject(desertRef)
                         verifyUser();
                       }
                     } catch (error) {
-                      alert(error);
+                      toast.error(error);
                     }
                   }}
                   className="text-red-500">

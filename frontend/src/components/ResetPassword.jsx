@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import axios from "axios";
+import axios from "../api/axios";
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 function ResetPassword() {
-    const {id,token} = useParams();
+    const {id,} = useParams();
     const navigate = useNavigate();
     const [CPassword,setCPassword] = useState("");
     const [Password,setNewPassword] = useState("");
@@ -10,17 +11,16 @@ function ResetPassword() {
     const save =async()=>{
         try {
             if(Password != CPassword){
-                alert("Both Password are diffrent...");
+                toast.error("Both Password are diffrent...");
             }
             else{
-                axios.defaults.headers.common["Authorization"] = token;
-                await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_password/${id}`,{
+                await axios.post(`/update_password/${id}`,{
                    Password
                    })
                    navigate("/login_dashboard")
             }
         } catch (error) {
-            alert(error);
+            toast.error(error);
         }
     }
   return (

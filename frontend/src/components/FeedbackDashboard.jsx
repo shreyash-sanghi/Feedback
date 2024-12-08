@@ -1,7 +1,8 @@
 import { React, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import dayjs from 'dayjs'; // Import dayjs for easier date calculations
+import { toast } from 'react-toastify';
 
 export default function FeedbackDashboard() {
   const navigate = useNavigate();
@@ -14,12 +15,8 @@ export default function FeedbackDashboard() {
   const [feedbackCounts, setFeedbackCounts] = useState({});
 
   const verifyUser = async () => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = token;
-    }
     try {
-      const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_feedback`);
+      const result = await axios.get(`/get_feedback`);
       
       // Sort the data based on FeedbackDate and FeedbackTime
       const sortedData = result.data.response.sort((a, b) => {
@@ -37,7 +34,7 @@ export default function FeedbackDashboard() {
       if (error.response.status === 401) {
         navigate(`/login_dashboard`);
       } else {
-        alert(error);
+        toast.error(error);
       }
     }
   };
@@ -272,11 +269,11 @@ export default function FeedbackDashboard() {
                     <button
                       onClick={async () => {
                         try {
-                          await axios.delete(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/delete_feedback/${result._id}`);
-                          alert("Feedback removed successfully");
+                          await axios.delete(`/delete_feedback/${result._id}`);
+                          toast.success("Feedback removed successfully");
                           verifyUser();
                         } catch (error) {
-                          alert(error);
+                          toast.error(error);
                         }
                       }}
                       className='text-red-500'

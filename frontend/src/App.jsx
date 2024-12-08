@@ -9,6 +9,9 @@ import Dashboard from './components/Dashboard'
 import Account from './components/Account'
 import StafDashboard from './components/StafDashboard'
 import ResetPassword from './components/ResetPassword'
+import { ToastContainer } from 'react-toastify';
+  import 'react-toastify/dist/ReactToastify.css';
+
 export default function App() {
   useEffect(() => {
     if (window.location.pathname === '/') {
@@ -29,6 +32,7 @@ export default function App() {
   <Route path='/reset_password/:token/:id' Component={ResetPassword}/>
 
 </Routes>
+<ToastContainer/>
     </div>
   )
 }

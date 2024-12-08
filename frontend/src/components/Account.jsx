@@ -1,10 +1,11 @@
 import {React,useState,useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import axios from "axios";
+import axios from "../api/axios";
 import User_profile from "../assets/user_profile.jpg"
 import { getStorage,getDownloadURL,ref, deleteObject,uploadBytes } from 'firebase/storage';
 import {v4} from "uuid";
+import { toast } from 'react-toastify';
 function Account() {
    const navigate = useNavigate();
    const [EditData,setEditData] = useState({
@@ -26,12 +27,8 @@ function Account() {
   const [profile,setProfile] = useState();
 
   const verifyUser = async()=>{
-    const token = sessionStorage.getItem('token');
-if (token) {
-axios.defaults.headers.common['Authorization'] = token;
-}
       try {
-          const result = await axios.get(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/get_myaccount`);
+          const result = await axios.get(`/get_myaccount`);
           // Fetch download URLs for profiles
           const data = result.data.response;
           if(data.Profile != undefined){
@@ -65,7 +62,7 @@ axios.defaults.headers.common['Authorization'] = token;
         if(error.response.status===401){
           navigate(`/login_dashboard`)
         }else{
-          alert(error);
+          toast.error(error);
         }
       }
   }
@@ -84,20 +81,20 @@ axios.defaults.headers.common['Authorization'] = token;
     try {
      const {Name,Number,Email} = initial;
       if(Name === ""){
-         alert("Please Enter Your Name... ")
+         toast.error("Please Enter Your Name... ")
          return;
      }
      else if(Number === ""){
-         alert("Please Enter Valid Number... ")
+         toast.error("Please Enter Valid Number... ")
          return;
      }
      else if(Email === ""){
-         alert("Please Provide Email... ")
+         toast.error("Please Provide Email... ")
          return;
      }
      else{
       if(profile == undefined){
-        await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_team_account`,{
+        await axios.post(`/update_team_account`,{
           Name,Number,Email
          })
       }
@@ -111,7 +108,7 @@ axios.defaults.headers.common['Authorization'] = token;
        })
         }else{
           const pastProfileRef = ref(storage,`files/${initial.ProfileName}`);
-          await axios.post(`https://feedbackbackend-shreyash-sanghis-projects.vercel.app/update_team_account`,{
+          await axios.post(`/update_team_account`,{
             Name,Number,Email,Profile:image
           })
           deleteObject(pastProfileRef);
@@ -119,17 +116,16 @@ axios.defaults.headers.common['Authorization'] = token;
       try {
         uploadBytes(imgref,profile)
       } catch (error) {
-        alert("Your Profile have not uplode")
+        toast.error("Your Profile have not uplode")
           return;
       }
       }
       setProfile();
       verifyUser();
-     alert("Success...")
+     toast.success("Success...")
  }
     } catch (error) {
-     alert(error)
-    //  alert("They have some error...")
+     toast.error(error)
     }
  }
 useEffect(()=>{
