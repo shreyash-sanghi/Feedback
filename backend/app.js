@@ -213,6 +213,7 @@ app.post("/verify_key",async(req,res)=>{
         const key = req.body.key;
         const Email = req.body.Email;
         const data = await Team.findOne({Email});
+
         if(data == null && Email == process.env.Owner_Email){
             const password = await bcrypt.hash(key,10);
           const result =  await Team.create({Email,Key:password,Position:"Admin",Name:"Rohit Jain"});
@@ -227,6 +228,7 @@ app.post("/verify_key",async(req,res)=>{
                 const verify = await bcrypt.compare(key,data.Key);
                 if(verify){
                     const Token = jwt.sign({_id:data._id},process.env.SecretKey);
+                    console.log(data._id)
                     res.status(202).json({Token:Token,OwnerEmail:process.env.Owner_Email});
                 }else{
                     res.status(404).json({error:"Enter correct id and code "});
@@ -234,7 +236,7 @@ app.post("/verify_key",async(req,res)=>{
             }
         }
     } catch (error) {
-
+console.log(error)
         res.status(404).json({error});
     }
 }) 
@@ -387,6 +389,7 @@ app.get("/get_myaccount",auth,async(req,res)=>{
 try {
     const id = req.id;
     const data = await Team.findById(id);
+    console.log(data)
         res.status(202).json({response:data})
 } catch (error) {
     res.sendStatus(404);
