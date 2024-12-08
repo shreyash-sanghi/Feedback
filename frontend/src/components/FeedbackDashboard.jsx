@@ -191,7 +191,7 @@ export default function FeedbackDashboard() {
 
           <button
             onClick={() => {
-              sessionStorage.removeItem("token");
+              localStorage.removeItem("token");
               navigate('/login_dashboard');
             }}
             className='px-4 l m-2 cursor-pointer duration-300'

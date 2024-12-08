@@ -235,7 +235,7 @@ export default function AdminDashboard() {
         <button
            onClick={
             ()=>{
-              sessionStorage.removeItem("token");
+              localStorage.removeItem("token");
                navigate('/login_dashboard')   
             }
            }
