@@ -201,7 +201,7 @@ app.post("/get_token",async(req,res)=>{
     try {
        const {Number,Name} = req.body;
               const response =  await OtpData.create({Name,Number});
-          const token = jwt.sign({_id:response._id},process.env.SectetKey)
+          const token = jwt.sign({_id:response._id},process.env.SecretKey)
             res.status(202).json({token});
     } catch (error) {
         res.sendStatus(404);
@@ -216,7 +216,7 @@ app.post("/verify_key",async(req,res)=>{
         if(data == null && Email == process.env.Owner_Email){
             const password = await bcrypt.hash(key,10);
           const result =  await Team.create({Email,Key:password,Position:"Admin",Name:"Rohit Jain"});
-                const Token = jwt.sign({_id:result._id},process.env.SectetKey);
+                const Token = jwt.sign({_id:result._id},process.env.SecretKey);
                 res.status(202).json({Token:Token,OwnerEmail:process.env.Owner_Email});
         }
         else{
@@ -226,7 +226,7 @@ app.post("/verify_key",async(req,res)=>{
             else{
                 const verify = await bcrypt.compare(key,data.Key);
                 if(verify){
-                    const Token = jwt.sign({_id:data._id},process.env.SectetKey);
+                    const Token = jwt.sign({_id:data._id},process.env.SecretKey);
                     res.status(202).json({Token:Token,OwnerEmail:process.env.Owner_Email});
                 }else{
                     res.status(404).json({error:"Enter correct id and code "});
@@ -306,7 +306,7 @@ app.post("/send_pasword_reset_link",async(req,res)=>{
          if(result == null || result == undefined){
             res.status(404).json({error:"No account is present.. "});
          }else{
-            const token = jwt.sign({_id:result._id},process.env.SectetKey);
+            const token = jwt.sign({_id:result._id},process.env.SecretKey);
             const Link = `https://payclickfeedback.vercel.app/reset_password/${token}/${result._id}`;
             const apiUrl = 'https://whatsbot.tech/api/send_sms';
             const apiToken = process.env.otp_api_token; // Replace with your WhatsBot API key
