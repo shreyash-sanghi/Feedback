@@ -5,7 +5,7 @@ const addData = async (req,res,next)=>{
         const authHeader = req.header('Authorization');
         if (!authHeader) throw new Error("Authorization header missing");
         
-        const token = authHeader.split(" ")[0]; // Assuming "Bearer <token>"
+        const token = authHeader.split(" ")[1]; // Assuming "Bearer <token>"
         if (!token) throw new Error("Token not provided");
 const varifyUser = jwt.verify(token,process.env.SecretKey);
         req.Token = token;
