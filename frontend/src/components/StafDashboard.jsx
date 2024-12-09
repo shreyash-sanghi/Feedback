@@ -107,7 +107,7 @@ function StafDashboard() {
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Feedback Time</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Feedback Date</th>
                 <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider">Member Name</th>
-                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm leading-4 text-blue-500 tracking-wider"></th>
+               
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -121,22 +121,6 @@ function StafDashboard() {
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.FeedbackTime}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.FeedbackDate}</td>
                   <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">{result.MemberName}</td>
-                  <td className="px-6 py-4 whitespace-no-wrap leading-5">
-                    <button
-                      onClick={async () => {
-                        try {
-                          await axios.delete(`/delete_feedback/${result._id}`);
-                          toast.success("Feedback removed successfully");
-                          verifyUser();
-                        } catch (error) {
-                          toast.error(error);
-                        }
-                      }}
-                      className='text-red-500'
-                    >
-                      Remove
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>
