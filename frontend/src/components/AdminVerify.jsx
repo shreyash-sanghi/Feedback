@@ -18,10 +18,12 @@ const verifyotp = async(e)=>{
         const OwnerEmail = response.data.OwnerEmail;
           localStorage.setItem('token', token);
          if(OwnerEmail == myemail){
-           navigate(`/admin_dashboard`)
+           window.location.href = `/admin_dashboard`
+           //  navigate(``)
           }
           else{
-           navigate(`/staf_dashboard`)
+            window.location.href = `/staf_dashboard`
+          //  navigate(``)
          }
     } catch (error) {
       toast.error(error.response?.data?.error || error)

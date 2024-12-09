@@ -6,7 +6,7 @@ const AxiosApi = axios.create({
 baseURL:BASE_URL,
 timeout:5000,
 headers:{
-    'Authorization': localStorage.getItem("token"),
+    'Authorization': `Bearer ${localStorage.getItem("token")}`,
     'Content-Type': 'application/json'
 }
 })
