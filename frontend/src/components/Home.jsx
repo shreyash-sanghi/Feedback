@@ -36,10 +36,6 @@ const {id} = useParams();
     const savedata = async()=>{
        try {
         const {Name,Number,Rating,TeamHelped, Suggestions} = initial;
-        // if(token === null || token === undefined){
-        //    sendOtp();
-        // }
-        // else{ 
         if(Name === ""){
             toast.error("Please Enter Your Name... ")
             return;
@@ -73,12 +69,8 @@ const {id} = useParams();
         toast.success("Thankyou For You Feedback...")
         window.location.href = 'https://www.payclick.co.in/Web/Default.aspx';
     }
-        // }
-        
-
        } catch (error) {
         if(error.response.status === 400){
-
           toast.error(error.response?.data?.message || error)
         }else{
           toast.error(error)
