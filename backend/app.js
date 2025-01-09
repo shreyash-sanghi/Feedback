@@ -41,10 +41,9 @@ function parseDateString(dateString) {
     return new Date(year, month - 1, day);
 }
 
-app.post("/send_feedback/:id", async (req, res) => {
-   
-    const { Name,FeedbackTime, Number, Rating, Suggestions, FeedbackDate, TeamHelped } = req.body;
 
+app.post("/send_feedback/:id", async (req, res) => {
+    const { Name, FeedbackTime, Number, Rating, Suggestions, FeedbackDate, TeamHelped } = req.body;
     const apiUrl = 'https://whatsbot.tech/api/send_sms';
     const apiToken = process.env.otp_api_token;
     const mobile = `91${Number}`;
@@ -63,7 +62,6 @@ Powered By :- Pay Click Online Services
     try {
         // Convert incoming FeedbackDate to a Date object
         const feedbackDateObject = parseDateString(FeedbackDate);
-
         // Check if the user has already submitted feedback this month
         const currentMonth = feedbackDateObject.getMonth();
         const currentYear = feedbackDateObject.getFullYear();
@@ -75,45 +73,54 @@ Powered By :- Pay Click Online Services
                 $lt: new Date(currentYear, currentMonth + 1, 1)
             }
         });
+
         if (existingFeedback) {
             return res.status(400).json({ message: "You have already submitted feedback this month." });
         }
-        try {
-            const id = req.params.id;
-            const result = await Team.findById(id);
 
-            await FeedbackMessage.create({
-                Name,
-                Number,
-                Rating,
-                Suggestions,
-                MemberName: result.Name,
-                MemberEmail: result.Email,
-                FeedbackDate: FeedbackDate, // Save as a Date object
-                MonthDate:feedbackDateObject,
-                TeamHelped,
-                FeedbackTime
-            });
-        // If no feedback found for this month, proceed with sending the SMS and saving the feedback
-        await axios.get(apiUrl, {
-            params: {
-                api_token: apiToken,
-                mobile: mobile,
-                message: message
-            },
-            httpsAgent: agent
+        const id = req.params.id;
+        const result = await Team.findById(id);
+        if (!result) {
+            return res.status(404).json({ message: "Team member not found." });
+        }
+
+        await FeedbackMessage.create({
+            Name,
+            Number,
+            Rating,
+            Suggestions,
+            MemberName: result.Name,
+            MemberEmail: result.Email,
+            FeedbackDate: FeedbackDate, // Save as a Date object
+            MonthDate: feedbackDateObject,
+            TeamHelped,
+            FeedbackTime
         });
 
-            const num = result.Number;
-            const teamNumber = `91${num}`;
-            const messageForTeam = `
-            Hi ${result.Name}
+        // Send message to the user
+        try {
+            await axios.get(apiUrl, {
+                params: {
+                    api_token: apiToken,
+                    mobile: mobile,
+                    message: message
+                },
+                httpsAgent: agent
+            });
+        } catch (error) {
+            console.error("Failed to send message to user:", error.message);
+        }
 
-            ${Name} gave a rating of ${Rating} out of 10 and you helped in ${TeamHelped} and their suggestion is ${Suggestions}
+        const teamNumber = `91${result.Number}`;
+        const messageForTeam = `
+Hi ${result.Name}
 
-            Date: ${FeedbackDate}
-            `;
+${Name} gave a rating of ${Rating} out of 10 and you helped in ${TeamHelped}. Their suggestion is: ${Suggestions}
 
+Date: ${FeedbackDate}
+        `;
+
+        try {
             await axios.get(apiUrl, {
                 params: {
                     api_token: apiToken,
@@ -122,20 +129,17 @@ Powered By :- Pay Click Online Services
                 },
                 httpsAgent: agent
             });
-
-            res.sendStatus(202);  // Respond with 202 Accepted
         } catch (error) {
-            console.error('Error saving feedback:', error);
-            res.sendStatus(404);  // Respond with 404 Not Found if the team is not found
+            console.error("Failed to send message to team member:", error.message);
         }
-
+        res.status(200).json({ message: "Feedback saved successfully." });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: 'Server error' });
+        console.error("Error processing feedback:", error);
+        res.status(500).json({ success: false, error: "Server error" });
     }
 });
 
-// Function to parse date string in dd-mm-yyyy format
+
 function parseDateString(dateString) {
     const [day, month, year] = dateString.split('-').map(Number);
     return new Date(year, month - 1, day);
